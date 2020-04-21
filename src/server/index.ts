@@ -48,17 +48,7 @@ export class Server {
     }
 
     async dbConfigure(): Promise<Connection> {
-        return await dbConnect(
-            {
-                host: process.env.DB_HOST,
-                port: parseInt(process.env.DB_PORT || '5432'),
-                username: process.env.DB_USER,
-                password: process.env.DB_PASS,
-                database: process.env.NODE_ENV === 'test' ? process.env.TEST_DB_NAME : process.env.DB_NAME,
-                ...this.databaseConfig,
-            },
-            this.type,
-        );
+        return await dbConnect(this.databaseConfig, this.type);
     }
 
     getCorsSettings(): CorsOptions {

@@ -36,6 +36,10 @@ CREATE DATABASE "test-server";
 CREATE USER username WITH ENCRYPTED PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE "server" TO username;
 GRANT ALL PRIVILEGES ON DATABASE "test-server" TO username;
+\c server;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+\c "test-server";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 \q
 ```
 

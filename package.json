@@ -15,6 +15,7 @@
    "description": "GraphQL template server with role base access model",
    "license": "MIT",
    "devDependencies": {
+      "@types/bcrypt": "^3.0.0",
       "@types/connect-redis": "^0.0.13",
       "@types/express-session": "^1.17.0",
       "@types/glob": "^7.1.1",
@@ -23,6 +24,8 @@
       "@types/node": "^8.0.29",
       "@types/redis": "^2.8.17",
       "@types/request-promise": "^4.1.46",
+      "@types/uuid": "^7.0.2",
+      "@types/yup": "^0.26.37",
       "@typescript-eslint/eslint-plugin": "^2.27.0",
       "@typescript-eslint/parser": "^2.27.0",
       "eslint": "^6.8.0",
@@ -38,6 +41,7 @@
       "typescript": "3.3.3333"
    },
    "dependencies": {
+      "bcrypt": "^4.0.1",
       "connect-redis": "^4.0.4",
       "dotenv": "^8.2.0",
       "express-session": "^1.17.0",
@@ -51,7 +55,10 @@
       "redis": "^3.0.2",
       "reflect-metadata": "^0.1.10",
       "request-promise": "^4.2.5",
-      "typeorm": "0.2.24"
+      "typeorm": "0.2.24",
+      "unique-names-generator": "^4.2.0",
+      "uuid": "^7.0.3",
+      "yup": "^0.28.3"
    },
    "scripts": {
       "start": "NODE_ENV=development NODE_PATH=src nodemon --exec ts-node --files src/index.ts",
