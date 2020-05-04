@@ -1,28 +1,36 @@
-import { ValidationError as YupvalidationError } from 'yup';
+import { IException, IExceptions } from 'types';
 
-interface Exception {
-    code: string;
-    message?: string | null;
-    path?: string | null;
-    data?: {
-        [key: string]: any;
-    };
+export class Exception {
+    private _exception: IException[] = [];
+    __typename = 'Exceptions';
+
+    get exception(): IExceptions {
+        return {
+            exceptions: this._exception,
+            __typename: this.__typename,
+        };
+    }
+
+    add(exceptions: IException[] | IException | IExceptions): void {
+        if (Array.isArray(exceptions)) {
+            this._exception = [...this._exception, ...exceptions];
+        } else if ('exceptions' in exceptions && exceptions?.exceptions) {
+            this._exception.push(...exceptions.exceptions);
+        } else {
+            this._exception.push(exceptions as IException);
+        }
+    }
+
+    get hasException(): boolean {
+        return this._exception.length > 0;
+    }
+
+    static generator(defaults: Partial<IException>): Function {
+        return function (details: Partial<IException> = {}): any {
+            return {
+                ...defaults,
+                ...details,
+            };
+        };
+    }
 }
-
-type ExceptionFunction = (defaults: Partial<Exception>) => (details: Partial<Exception> | undefined) => Exception;
-
-export const ExceptionGenerator: ExceptionFunction = (defaults) => (details = {}): any => ({
-    ...defaults,
-    ...details,
-});
-
-export const VALIDATION_EXCEPTION = 'ValidationException';
-export const ValidationException = (errors: YupvalidationError): Exception[] => {
-    return errors.inner.map(
-        ({ message, path, value }): Exception =>
-            ExceptionGenerator({
-                code: VALIDATION_EXCEPTION,
-                message,
-            })({ path, data: { value } }),
-    );
-};

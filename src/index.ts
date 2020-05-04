@@ -4,12 +4,13 @@
  * https://github.com/Faisal-Manzer/graphql-typescript-server
  */
 
-import { config as enviromentConfig } from 'dotenv';
+import { config as dotEnvConfig } from 'dotenv';
 import { Server } from './server';
+import { AddressInfo } from 'net';
 
-enviromentConfig();
+dotEnvConfig();
 const server = new Server({}, 4000);
 server.start().then((app) => {
-    const { port, address } = app.address();
+    const { port, address } = app.address() as AddressInfo;
     console.log(`Started server ${address} at http://localhost:${port}`);
 });

@@ -1,0 +1,21 @@
+scalar UUID
+scalar any
+
+type Exception {
+    path: String,
+    message: String,
+    code: String!,
+    data: any
+}
+
+type Exceptions {
+    exceptions: [Exception!]!
+}
+
+type User {
+    id: UUID!,
+    email: String,
+    name: String
+}
+
+union UserOrExceptions = User | Exceptions

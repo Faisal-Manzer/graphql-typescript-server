@@ -8,3 +8,4 @@ temp/
 .c9
 yarn.lock
 yarn-error.log
+orb.db

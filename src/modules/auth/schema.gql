@@ -1,0 +1,11 @@
+# import User from 'modules/common.gql'
+
+type Query {
+    me: User
+}
+
+type Mutation {
+    logout (fromAll: Boolean = false): Boolean
+    testRegister (email: String!, name: String!): User
+    testLogin (email: String!): User
+}

@@ -13,12 +13,7 @@
     "@typescript-eslint/no-explicit-any": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
-      "off",
-      {
-        "vars": "local",
-        "args": "after-used",
-        "ignoreRestSiblings": true
-      }
+      "off"
     ],
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/ban-ts-ignore": "off",

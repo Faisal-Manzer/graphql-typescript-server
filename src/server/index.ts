@@ -7,7 +7,7 @@ import { CorsOptions } from 'cors';
 
 import { GraphQLServer } from 'graphql-yoga';
 
-import { Server as HttpServer, Context, ContextProvider } from '@types';
+import { Server as HttpServer, Context, ContextProvider } from 'types';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
@@ -44,11 +44,11 @@ export class Server {
         this.cors = this.getCorsSettings();
         this.express = this.server.express;
         this.configureApp(this.server.express);
-        this.addMiddlewares(this.server.express);
+        this.addMiddleware(this.server.express);
     }
 
     async dbConfigure(): Promise<Connection> {
-        return await dbConnect(this.databaseConfig, this.type);
+        return await dbConnect(this.databaseConfig);
     }
 
     getCorsSettings(): CorsOptions {
@@ -68,7 +68,7 @@ export class Server {
         express.set('trust proxy', 1);
     }
 
-    addMiddlewares(express: Application): void {
+    addMiddleware(express: Application): void {
         middlewares.map((middleware) => express.use(middleware));
     }
 

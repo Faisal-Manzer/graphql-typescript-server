@@ -19,3 +19,16 @@ export interface Context {
     request: Request;
     session: Session;
 }
+
+export interface IException {
+    code: string;
+    message?: string | null;
+    path?: string | null;
+    data?: {
+        [key: string]: any;
+    };
+}
+export interface IExceptions {
+    __typename: string;
+    exceptions: IException[];
+}
