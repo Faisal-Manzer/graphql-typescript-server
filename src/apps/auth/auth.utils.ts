@@ -1,11 +1,11 @@
 import { Session } from 'types';
-import { User } from 'entity/User';
-import { ValidationException } from 'modules/exceptions';
+import { User } from 'apps/entities/User';
+import { ValidationException } from 'apps/exceptions';
 import { redis } from 'server/redis';
 import { REDIS_USER_SESSION_PREFIX, REDIS_SESSION_PREFIX } from 'server/constants';
 
-import { registerParmValidator } from './validators';
-import { UserExistsException } from './exceptions';
+import { registerParmValidator } from './auth.validators';
+import { UserExistsException } from './auth.exceptions';
 
 type RegisterParams = {
     email: string;

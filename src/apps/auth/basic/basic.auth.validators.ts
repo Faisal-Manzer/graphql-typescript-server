@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { emailValidator, nameValidator } from '../validators';
+import { emailValidator, nameValidator } from '../auth.validators';
 
 export const passwordValidator = yup
     .string()

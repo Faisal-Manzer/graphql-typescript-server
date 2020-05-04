@@ -10,7 +10,7 @@ import { Connection } from 'typeorm';
 import { TestClient } from 'utils/testClient';
 import { dbConnect } from 'server/db';
 
-import { findUserByEmail, register } from './utils';
+import { findUserByEmail, register } from './auth.utils';
 import { toTitleCase } from 'utils/funcs';
 
 let conn: Connection;

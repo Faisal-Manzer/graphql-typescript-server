@@ -11,7 +11,7 @@ import { Server as HttpServer, Context, ContextProvider } from 'types';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
-import { schema } from './schema';
+import { generateSchema } from './schema';
 import { middlewares } from './middlewares';
 
 export class Server {
@@ -34,7 +34,7 @@ export class Server {
     async config(): Promise<void> {
         this.db = await this.dbConfigure();
         this.redis = redis;
-        this.schema = schema;
+        this.schema = generateSchema();
 
         this.server = new GraphQLServer({
             schema: this.schema,

@@ -5,15 +5,15 @@ import { test as isCommonPassword } from 'fxa-common-password-list';
 
 import { ResolverContext, ResolverMap } from 'types/graphql-utils';
 import { Exception } from 'utils/exceptionGenerator';
-import { ValidationException, UnknownException } from 'modules/exceptions';
-import { User } from 'entity/User';
+import { ValidationException, UnknownException } from 'apps/exceptions';
+import { User } from 'apps/entities/User';
 
-import { loginUser, register } from '../utils';
+import { loginUser, register } from '../auth.utils';
 
-import { PasswordGuessableException } from './exceptions';
-import { BasicAuth } from './entity/BasicAuth';
-import { registerWithPasswordArgumentsValidator } from './validators';
-import { checkCredentials } from './utils';
+import { PasswordGuessableException } from './basic.auth.exceptions';
+import { BasicAuth } from './entities/BasicAuth';
+import { registerWithPasswordArgumentsValidator } from './basic.auth.validators';
+import { checkCredentials } from './basic.auth.utils';
 
 export const Resolvers: ResolverMap = {
     UserOrExceptions: {

@@ -1,9 +1,9 @@
 import { ResolverContext, ResolverMap } from 'types/graphql-utils';
-import { User } from 'entity/User';
+import { User } from 'apps/entities/User';
 import { REDIS_SESSION_PREFIX } from 'server/constants';
 import { redis } from 'server/redis';
 
-import { findUserByEmail, loginUser, logOutOfAllSession, register } from './utils';
+import { findUserByEmail, loginUser, logOutOfAllSession, register } from './auth.utils';
 
 export const Resolvers: ResolverMap = {
     UserOrExceptions: {

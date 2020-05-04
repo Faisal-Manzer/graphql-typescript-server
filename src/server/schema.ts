@@ -5,20 +5,24 @@ import { makeExecutableSchema } from 'graphql-tools';
 import { mergeResolvers, mergeTypes } from 'merge-graphql-schemas';
 import { importSchema } from 'graphql-import';
 
-export const generateSchema = (): any => {
-    const pathToModules = joinPath(__dirname, '../modules');
+export const generateTypeDefs = (): any => {
+    const pathToModules = joinPath(__dirname, '../apps');
 
-    const graphqlTypes = globSync(`${pathToModules}/**/*.gql`).map((schema: string) =>
+    const graphqlTypes = globSync(`${pathToModules}/**/*.@(gql|graphql)`).map((schema: string) =>
         importSchema(readFileSync(schema, { encoding: 'utf8' })),
     );
-    const typeDefs = mergeTypes(graphqlTypes);
-
-    const graphqlResolvers = globSync(`${pathToModules}/**/resolvers.?s`).map(
-        (resolver: string) => require(resolver).Resolvers,
-    );
-
-    const resolvers = mergeResolvers(graphqlResolvers);
-    return makeExecutableSchema({ typeDefs, resolvers: resolvers as any });
+    return mergeTypes(graphqlTypes);
 };
 
-export const schema = generateSchema();
+export const generateResolverSchema = (): any => {
+    const pathToModules = joinPath(__dirname, '../apps');
+
+    const resolvers = globSync(`${pathToModules}/**/?(*.)resolvers.?s`).map(
+        (resolver: string) => require(resolver).Resolvers,
+    );
+    return mergeResolvers(resolvers);
+};
+
+export const generateSchema = (): any => {
+    return makeExecutableSchema({ typeDefs: generateTypeDefs(), resolvers: generateResolverSchema() });
+};

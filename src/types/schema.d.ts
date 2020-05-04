@@ -35,22 +35,11 @@ declare namespace GQL {
 
     interface IMutation {
         __typename: 'Mutation';
-        registerWithPassword: UserOrExceptions | null;
-        loginWithPassword: UserOrExceptions | null;
         logout: boolean | null;
         testRegister: IUser | null;
         testLogin: IUser | null;
-    }
-
-    interface IRegisterWithPasswordOnMutationArguments {
-        email: string;
-        password: string;
-        name: string;
-    }
-
-    interface ILoginWithPasswordOnMutationArguments {
-        email: string;
-        password: string;
+        registerWithPassword: UserOrExceptions | null;
+        loginWithPassword: UserOrExceptions | null;
     }
 
     interface ILogoutOnMutationArguments {
@@ -67,6 +56,17 @@ declare namespace GQL {
 
     interface ITestLoginOnMutationArguments {
         email: string;
+    }
+
+    interface IRegisterWithPasswordOnMutationArguments {
+        email: string;
+        password: string;
+        name: string;
+    }
+
+    interface ILoginWithPasswordOnMutationArguments {
+        email: string;
+        password: string;
     }
 
     type UserOrExceptions = IUser | IExceptions;

@@ -1,6 +1,6 @@
 import { Entity, Column, BaseEntity, OneToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from 'entity/User';
+import { User } from 'apps/entities/User';
 
 @Entity()
 export class BasicAuth extends BaseEntity {

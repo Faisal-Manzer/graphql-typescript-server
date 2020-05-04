@@ -1,4 +1,4 @@
-# import User from 'modules/common.gql'
+# import User from 'apps/common.gql'
 
 type Query {
     me: User

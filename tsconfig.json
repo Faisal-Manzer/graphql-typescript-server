@@ -27,7 +27,7 @@
   },
   "exclude": [
     "node_modules",
-    "src/migration"
+    "src/migrations"
   ],
   "include": [
     "./src/**/*.tsx",

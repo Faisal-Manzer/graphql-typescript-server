@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { User } from 'entity/User';
+import { User } from 'apps/entities/User';
 
 export interface Session extends Express.Session {
     user: User;
