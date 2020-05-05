@@ -2,18 +2,24 @@ import { ResolverContext, ResolverMap } from 'types/graphql-utils';
 import { User } from 'apps/entities/User';
 import { REDIS_SESSION_PREFIX } from 'server/constants';
 import { redis } from 'server/redis';
+import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
+import { Done, Exception } from 'utils/exceptionGenerator';
 
-import { findUserByEmail, loginUser, logOutOfAllSession, register } from './auth.utils';
+import { findUserByEmail, loginUser, logOutOfAllSession, register } from './utils';
+import { nameValidator } from './validators';
+
+import { ValidationException } from '../exceptions';
+import { IDone } from '../../types';
 
 export const Resolvers: ResolverMap = {
     UserOrExceptions: {
         __resolveType: (obj): string => (obj.exceptions ? 'Exceptions' : 'User'),
     },
+    DoneOrExceptions: {
+        __resolveType: (obj): string => (obj.exceptions ? 'Exceptions' : 'Done'),
+    },
     Query: {
-        me: async (_, __, { session }: ResolverContext): Promise<User | null> => {
-            if (session.user) return session.user;
-            return null;
-        },
+        me: loginRequired<User>()(async (_: any, __: any, { session }: ResolverContext) => session.user),
     },
     Mutation: {
         testRegister: async (_, args: any): Promise<User | null> => {
@@ -48,5 +54,16 @@ export const Resolvers: ResolverMap = {
                 return destroySession();
             });
         },
+        updateName: loginRequired<IDone>({ query: true })(
+            async (_: any, { name }: any, __: any, ___: any, { user }: LoginRequiredExtra) => {
+                try {
+                    user.name = (await nameValidator.validate(name)) as string;
+                    await user.save();
+                    return Done();
+                } catch (validationError) {
+                    return Exception.new(ValidationException(validationError));
+                }
+            },
+        ),
     },
 };

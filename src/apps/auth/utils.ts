@@ -4,8 +4,8 @@ import { ValidationException } from 'apps/exceptions';
 import { redis } from 'server/redis';
 import { REDIS_USER_SESSION_PREFIX, REDIS_SESSION_PREFIX } from 'server/constants';
 
-import { registerParmValidator } from './auth.validators';
-import { UserExistsException } from './auth.exceptions';
+import { registerParmValidator } from './validators';
+import { UserExistsException } from './exceptions';
 
 type RegisterParams = {
     email: string;
@@ -13,7 +13,7 @@ type RegisterParams = {
 };
 
 export const findUserByEmail = async (email: string): Promise<User | undefined> => {
-    return await User.findOne({ email: email.toLowerCase() });
+    return await User.findOne({ where: { email: email.toLowerCase() } });
 };
 
 export const register = async (params: RegisterParams): Promise<User> => {

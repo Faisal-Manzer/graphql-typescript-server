@@ -11,7 +11,7 @@ export interface ResolverContext {
     session: Session;
 }
 
-export type Resolver = (parent: any, args: any, context: ResolverContext, info: any) => any;
+export type Resolver = (parent: any, args: any, context: ResolverContext, info: any, extra?: any) => any;
 export interface ResolverMap {
     [key: string]: {
         [key: string]: Resolver;

@@ -11,8 +11,8 @@ import { dbConnect } from 'server/db';
 import { TestClient } from 'utils/testClient';
 import { VALIDATION_EXCEPTION } from 'apps/exceptions';
 import { BasicAuth } from './entities/BasicAuth';
-import { INVALID_CREDENTIALS_EXCEPTION } from './basic.auth.exceptions';
-import { USER_DOES_NOT_EXIST } from '../auth.exceptions';
+import { INVALID_CREDENTIALS_EXCEPTION } from './exceptions';
+import { USER_DOES_NOT_EXIST } from '../exceptions';
 
 let conn: Connection;
 

@@ -1,4 +1,4 @@
-import { IException, IExceptions } from 'types';
+import { IException, IExceptions, IDone } from 'types';
 
 export class Exception {
     private _exception: IException[] = [];
@@ -33,4 +33,15 @@ export class Exception {
             };
         };
     }
+
+    static new(exceptions: IException[] | IException | IExceptions): IExceptions {
+        const e = new Exception();
+        e.add(exceptions);
+        return e.exception;
+    }
 }
+
+export const Done = (done = true): IDone => ({
+    done,
+    __typename: 'Done',
+});

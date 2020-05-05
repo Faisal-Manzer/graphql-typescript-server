@@ -1,8 +1,8 @@
 import { BasicAuth } from './entities/BasicAuth';
 import { User } from 'apps/entities/User';
 
-import { UserDoesNotExistException } from '../auth.exceptions';
-import { InvalidCredentialsException, OldPasswordUsedException } from './basic.auth.exceptions';
+import { UserDoesNotExistException } from '../exceptions';
+import { InvalidCredentialsException, OldPasswordUsedException } from './exceptions';
 
 export const checkCredentials = async (email: string, password: string): Promise<User> => {
     // const auth = await BasicAuth.findOne({ where: { user: { email } } });

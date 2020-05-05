@@ -10,8 +10,9 @@ import { Connection } from 'typeorm';
 import { TestClient } from 'utils/testClient';
 import { dbConnect } from 'server/db';
 
-import { findUserByEmail, register } from './auth.utils';
+import { findUserByEmail, register } from './utils';
 import { toTitleCase } from 'utils/funcs';
+import { LOGIN_REQUIRED_EXCEPTION, VALIDATION_EXCEPTION } from '../exceptions';
 
 let conn: Connection;
 
@@ -138,5 +139,53 @@ describe('logout', () => {
 
         await session1.logout(true);
         expect(await session2.me()).toEqual(null);
+    });
+});
+
+const changeNameQuery = (name: string): string => `
+    mutation {
+        updateName (name: "${name}") {
+            __typename
+            
+            ... on Done {
+                done
+            }
+            
+            ... on Exceptions {
+                exceptions {
+                    code
+                    path
+                }
+            }
+        }
+    }
+`;
+const updateNameError = TestClient.checkError('updateName');
+describe('update name', () => {
+    test('should login to change name', async (): Promise<void> => {
+        const session = new TestClient();
+        const { name } = TestClient.createCredentials();
+        await session.register();
+        TestClient.checkError(changeNameQuery(name))({
+            code: LOGIN_REQUIRED_EXCEPTION,
+        });
+    });
+
+    test('name is required', async (): Promise<void> => {
+        const session = new TestClient();
+        const { email } = await session.register();
+        await session.login(email);
+        const data = await session.query(changeNameQuery(''));
+        updateNameError(data)(VALIDATION_EXCEPTION, null);
+    });
+
+    test('change name success', async (): Promise<void> => {
+        const session = new TestClient();
+        const { name } = TestClient.createCredentials();
+        const { email } = await session.register();
+        await session.login(email);
+
+        const { updateName } = await session.query(changeNameQuery(name));
+        expect(updateName.done).toBeTruthy();
     });
 });

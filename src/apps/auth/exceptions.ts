@@ -11,3 +11,9 @@ export const UserDoesNotExistException = Exception.generator({
     code: USER_DOES_NOT_EXIST,
     message: 'User does not exists. Try registering user',
 });
+
+export const USER_NOT_VERIFIED = 'UserNotVerifiedException';
+export const UserNotVerifiedException = Exception.generator({
+    code: USER_NOT_VERIFIED,
+    message: 'User not verified. Check your mail box.',
+});

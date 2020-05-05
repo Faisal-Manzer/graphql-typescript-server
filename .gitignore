@@ -9,3 +9,5 @@ temp/
 yarn.lock
 yarn-error.log
 orb.db
+coverage
+roadmap.text

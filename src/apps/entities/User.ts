@@ -12,7 +12,6 @@ export class User extends BaseEntity {
     @Column()
     name: string; // Full Name
 
-    firstName(): string {
-        return this.name.split(' ')[0];
-    }
+    @Column({ default: false })
+    verified: boolean;
 }

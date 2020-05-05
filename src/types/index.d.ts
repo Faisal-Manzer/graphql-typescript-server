@@ -2,6 +2,7 @@ import { Redis } from 'ioredis';
 import { Request as ExpressRequest, Express } from 'express';
 import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
+import s from 'connect-redis';
 
 export type Server = HttpServer | HttpsServer;
 
@@ -31,4 +32,9 @@ export interface IException {
 export interface IExceptions {
     __typename: string;
     exceptions: IException[];
+}
+
+export interface IDone {
+    __typename: string;
+    done: boolean;
 }
