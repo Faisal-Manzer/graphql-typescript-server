@@ -17,12 +17,14 @@
   "devDependencies": {
     "@gql2ts/from-schema": "^2.0.0-4",
     "@types/bcrypt": "^3.0.0",
+    "@types/bull": "^3.12.2",
     "@types/connect-redis": "^0.0.13",
     "@types/express-session": "^1.17.0",
     "@types/glob": "^7.1.1",
     "@types/ioredis": "^4.16.0",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.13.4",
+    "@types/node-fetch": "^2.5.7",
     "@types/redis": "^2.8.18",
     "@types/request-promise": "^4.1.46",
     "@types/uuid": "^7.0.3",
@@ -36,6 +38,7 @@
     "husky": "^4.2.5",
     "jest": "22",
     "lint-staged": "^10.2.2",
+    "node-fetch": "^2.6.0",
     "nodemon": "^2.0.3",
     "prettier": "^2.0.5",
     "ts-jest": "22",
@@ -45,6 +48,7 @@
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
+    "bull": "^3.13.0",
     "connect-redis": "^4.0.4",
     "dotenv": "^8.2.0",
     "express-session": "^1.17.1",
@@ -91,10 +95,6 @@
       ".*/entities/.*",
       ".*/migrations/.*",
       "ormconfig.ts"
-    ],
-    "collectCoverage": true,
-    "coverageReporters": [
-      "text"
     ],
     "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",

@@ -11,7 +11,7 @@ import { Server as HttpServer, Context, ContextProvider } from 'types';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
-import { generateSchema } from './schema';
+import { generateSchema, hookViews } from './schema';
 import { middlewares } from './middlewares';
 
 export class Server {
@@ -43,8 +43,8 @@ export class Server {
 
         this.cors = this.getCorsSettings();
         this.express = this.server.express;
-        this.configureApp(this.server.express);
-        this.addMiddleware(this.server.express);
+        this.configureApp();
+        this.addMiddleware();
     }
 
     async dbConfigure(): Promise<Connection> {
@@ -59,17 +59,19 @@ export class Server {
         return {
             redis: this.redis,
             request,
+            host: `${request.protocol}://${request.get('host')}`,
             session: request.session,
         };
     }
 
-    configureApp(express: Application): void {
-        express.disable('x-powered-by');
-        express.set('trust proxy', 1);
+    configureApp(): void {
+        this.server.express.disable('x-powered-by');
+        this.server.express.set('trust proxy', 1);
     }
 
-    addMiddleware(express: Application): void {
-        middlewares.map((middleware) => express.use(middleware));
+    addMiddleware(): void {
+        middlewares.map((middleware) => this.server.express.use(middleware));
+        hookViews(this.server.express);
     }
 
     async start(): Promise<HttpServer> {

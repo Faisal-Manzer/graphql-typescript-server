@@ -19,6 +19,7 @@ export interface Context {
     redis: Redis;
     request: Request;
     session: Session;
+    host: string;
 }
 
 export interface IException {

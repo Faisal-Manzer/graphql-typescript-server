@@ -68,7 +68,7 @@ export class TestClient {
         };
     }
 
-    async registerUser(email: string, name: string): Promise<NewUser> {
+    async registerUser(email: string, name: string, autoVerify = true): Promise<NewUser> {
         const query = `
         mutation {
             testRegister(email: "${email}", name: "${name}") {
@@ -78,6 +78,14 @@ export class TestClient {
             }
         }`;
         const data = await this.query(query);
+        if (autoVerify) {
+            const verifyQuery = `
+                mutation {
+                    testVerify (email: "${email}")
+                }
+            `;
+            await this.query(verifyQuery);
+        }
         return { email, name, user: data.testRegister };
     }
 
@@ -94,9 +102,9 @@ export class TestClient {
         return { email, user: data.testLogin };
     }
 
-    async register(): Promise<NewUser> {
+    async register(autoVerify = true): Promise<NewUser> {
         const { email, name } = TestClient.createCredentials();
-        return await this.registerUser(email, name);
+        return await this.registerUser(email, name, autoVerify);
     }
 
     async me(): Promise<User> {

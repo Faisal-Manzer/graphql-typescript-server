@@ -1,15 +1,20 @@
 import { Session } from 'types';
+import { v4 as uuid } from 'uuid';
+
 import { User } from 'apps/entities/User';
 import { ValidationException } from 'apps/exceptions';
 import { redis } from 'server/redis';
-import { REDIS_USER_SESSION_PREFIX, REDIS_SESSION_PREFIX } from 'server/constants';
+import { REDIS_USER_SESSION_PREFIX, REDIS_SESSION_PREFIX, REDIS_VERIFY_USER } from 'server/constants';
 
 import { registerParmValidator } from './validators';
 import { UserExistsException } from './exceptions';
+import { VERIFY_USER_URL } from './views';
+import { getRedisKeyForValue } from '../../utils/funcs';
 
 type RegisterParams = {
     email: string;
     name: string;
+    redirectAfterVerification?: string;
 };
 
 export const findUserByEmail = async (email: string): Promise<User | undefined> => {
@@ -32,7 +37,6 @@ export const register = async (params: RegisterParams): Promise<User> => {
 
     const user = User.create({ email, name });
     await user.save();
-
     return user;
 };
 
@@ -49,4 +53,16 @@ export const loginUser = async (session: Session, user: User): Promise<boolean> 
 export const logOutOfAllSession = async (userId: string): Promise<void> => {
     const sessions = await redis.lrange(`${REDIS_USER_SESSION_PREFIX}:${userId}`, 0, -1);
     await Promise.all(sessions.map((sessionId: string) => redis.del(`${REDIS_SESSION_PREFIX}${sessionId}`)));
+};
+
+export const createVerificationLink = async (host: string, userId: string, redirect = ''): Promise<string> => {
+    const getURL = (key: string): string =>
+        `${host}${VERIFY_USER_URL.replace(':key', key)}?${redirect ? `redirect=${encodeURI(redirect)}` : ''}`;
+
+    const value = await getRedisKeyForValue(REDIS_VERIFY_USER, userId, (find: string, value: string) => find === value);
+    if (value) return getURL(value);
+
+    const key = uuid();
+    await redis.set(`${REDIS_VERIFY_USER}:${key}`, userId, 'ex', 60 * 15);
+    return `${host}${VERIFY_USER_URL.replace(':key', key)}?redirect=${encodeURI(redirect)}`;
 };

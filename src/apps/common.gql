@@ -19,7 +19,8 @@ type Done {
 type User {
     id: UUID!,
     email: String,
-    name: String
+    name: String,
+    verified: Boolean
 }
 
 union UserOrExceptions = User | Exceptions

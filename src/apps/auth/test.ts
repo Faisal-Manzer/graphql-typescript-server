@@ -6,15 +6,20 @@
  *
  */
 import { Connection } from 'typeorm';
+import fetch from 'node-fetch';
 
 import { TestClient } from 'utils/testClient';
 import { dbConnect } from 'server/db';
 
-import { findUserByEmail, register } from './utils';
+import { findUserByEmail, register, createVerificationLink } from './utils';
 import { toTitleCase } from 'utils/funcs';
 import { LOGIN_REQUIRED_EXCEPTION, VALIDATION_EXCEPTION } from '../exceptions';
+import { VERIFY_USER_URL } from './views';
+import { USER_NOT_VERIFIED } from './exceptions';
 
 let conn: Connection;
+const host = process.env.TEST_HOST || '';
+const hostTrailing = `${host}/`;
 
 beforeAll(async () => {
     conn = await dbConnect();
@@ -160,6 +165,7 @@ const changeNameQuery = (name: string): string => `
         }
     }
 `;
+
 const updateNameError = TestClient.checkError('updateName');
 describe('update name', () => {
     test('should login to change name', async (): Promise<void> => {
@@ -169,6 +175,14 @@ describe('update name', () => {
         TestClient.checkError(changeNameQuery(name))({
             code: LOGIN_REQUIRED_EXCEPTION,
         });
+    });
+
+    test('only verified user', async (): Promise<void> => {
+        const session = new TestClient();
+        const { email } = await session.register(false);
+        await session.login(email);
+        const data = await session.query(changeNameQuery(''));
+        updateNameError(data)(USER_NOT_VERIFIED, null);
     });
 
     test('name is required', async (): Promise<void> => {
@@ -187,5 +201,90 @@ describe('update name', () => {
 
         const { updateName } = await session.query(changeNameQuery(name));
         expect(updateName.done).toBeTruthy();
+    });
+});
+
+describe('verify user', () => {
+    test('create same link for same user', async () => {
+        const session = new TestClient();
+        const { user } = await session.register();
+
+        const link1 = await createVerificationLink(host, user.id, host);
+        const link2 = await createVerificationLink(host, user.id, host);
+
+        expect(link1).toEqual(link2);
+    });
+
+    test('create different link for different user', async () => {
+        const session = new TestClient();
+        const { user: user1 } = await session.register();
+        const { user: user2 } = await session.register();
+
+        const link1 = await createVerificationLink(host, user1.id, host);
+        const link2 = await createVerificationLink(host, user2.id, host);
+
+        expect(link1).not.toEqual(link2);
+    });
+
+    test('random id', async () => {
+        const link = `${host}${VERIFY_USER_URL.replace(':key', 'random-id')}`;
+        const response = await fetch(link);
+
+        expect(response.status).toEqual(400);
+        const obj = await response.json();
+
+        expect(obj.status).toEqual('error');
+    });
+
+    test('link confirms', async () => {
+        const session = new TestClient();
+        const { user } = await session.register();
+
+        const link = await createVerificationLink(host, user.id, host);
+        const response = await fetch(link);
+
+        expect(response.redirected).toEqual(true);
+        expect(response.url).toEqual(hostTrailing);
+    });
+
+    test('link invalidates', async () => {
+        // jest.setTimeout(30000);
+        const session = new TestClient();
+        const { user } = await session.register();
+
+        const link = await createVerificationLink(host, user.id, host);
+        await fetch(link);
+
+        const response = await fetch(link);
+
+        expect(response.status).toEqual(400);
+        const obj = await response.json();
+
+        expect(obj.status).toEqual('error');
+    });
+
+    test('verify non http', async () => {
+        // jest.setTimeout(30000);
+        const session = new TestClient();
+        const { user } = await session.register();
+
+        const link = await createVerificationLink(host, user.id, host.replace(/(^\w+:|^)\/\//, ''));
+        const response = await fetch(link);
+
+        expect(response.redirected).toEqual(true);
+        expect(response.url).toEqual(hostTrailing);
+    });
+
+    test('no redirect response', async () => {
+        const session = new TestClient();
+        const { user } = await session.register();
+
+        const link = await createVerificationLink(host, user.id);
+        const response = await fetch(link);
+
+        expect(response.status).toEqual(200);
+        const obj = await response.json();
+
+        expect(obj.status).toEqual('ok');
     });
 });

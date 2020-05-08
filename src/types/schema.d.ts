@@ -31,15 +31,29 @@ declare namespace GQL {
         id: any;
         email: string | null;
         name: string | null;
+        verified: boolean | null;
     }
 
     interface IMutation {
         __typename: 'Mutation';
+        registerWithPassword: UserOrExceptions | null;
+        loginWithPassword: UserOrExceptions | null;
         logout: boolean | null;
         testRegister: IUser | null;
         testLogin: IUser | null;
-        registerWithPassword: UserOrExceptions | null;
-        loginWithPassword: UserOrExceptions | null;
+        updateName: DoneOrExceptions | null;
+        sendConfMail: boolean | null;
+    }
+
+    interface IRegisterWithPasswordOnMutationArguments {
+        email: string;
+        password: string;
+        name: string;
+    }
+
+    interface ILoginWithPasswordOnMutationArguments {
+        email: string;
+        password: string;
     }
 
     interface ILogoutOnMutationArguments {
@@ -52,21 +66,20 @@ declare namespace GQL {
     interface ITestRegisterOnMutationArguments {
         email: string;
         name: string;
+        verify?: boolean | null;
     }
 
     interface ITestLoginOnMutationArguments {
         email: string;
     }
 
-    interface IRegisterWithPasswordOnMutationArguments {
-        email: string;
-        password: string;
+    interface IUpdateNameOnMutationArguments {
         name: string;
     }
 
-    interface ILoginWithPasswordOnMutationArguments {
+    interface ISendConfMailOnMutationArguments {
         email: string;
-        password: string;
+        redirect: string;
     }
 
     type UserOrExceptions = IUser | IExceptions;
@@ -82,6 +95,13 @@ declare namespace GQL {
         message: string | null;
         code: string;
         data: any | null;
+    }
+
+    type DoneOrExceptions = IDone | IExceptions;
+
+    interface IDone {
+        __typename: 'Done';
+        done: boolean | null;
     }
 }
 
