@@ -19,3 +19,9 @@ export const InvalidCredentialsException = Exception.generator({
     code: INVALID_CREDENTIALS_EXCEPTION,
     message: 'Either email or password is incorrect',
 });
+
+export const NO_CREDENTIALS_FOUND_EXCEPTION = 'NoCredentialsFoundException';
+export const NoCredentialsFoundException = Exception.generator({
+    code: NO_CREDENTIALS_FOUND_EXCEPTION,
+    message: 'No credentials found for given account',
+});

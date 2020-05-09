@@ -36,6 +36,5 @@ export interface IExceptions {
 }
 
 export interface IDone {
-    __typename: string;
     done: boolean;
 }

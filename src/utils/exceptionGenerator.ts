@@ -41,7 +41,4 @@ export class Exception {
     }
 }
 
-export const Done = (done = true): IDone => ({
-    done,
-    __typename: 'Done',
-});
+export const Done = (done = true): IDone => ({ done });

@@ -1,24 +1,27 @@
-import { IExceptions } from 'types';
+import { IDone, IExceptions } from 'types';
 
 // @ts-ignore
 import { test as isCommonPassword } from 'fxa-common-password-list';
 
 import { ResolverContext, ResolverMap } from 'types/graphql-utils';
-import { Exception } from 'utils/exceptionGenerator';
+import { Done, Exception } from 'utils/exceptionGenerator';
 import { ValidationException, UnknownException } from 'apps/exceptions';
 import { User } from 'apps/entities/User';
+import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
 
-import { loginUser, register } from '../utils';
+import { findUserByEmail, loginUser, register } from '../utils';
 
-import { PasswordGuessableException } from './exceptions';
+import { InvalidCredentialsException, OldPasswordUsedException, PasswordGuessableException } from './exceptions';
 import { BasicAuth } from './entities/BasicAuth';
-import { registerWithPasswordArgumentsValidator } from './validators';
-import { checkCredentials } from './utils';
+import {
+    changePasswordArgsValidator,
+    registerWithPasswordArgsValidator,
+    resetPasswordArgsValidator,
+} from './validators';
+import { checkCredentials, getBasicAuthUsingEmail } from './utils';
+import { UserDoesNotExistException } from '../exceptions';
 
 export const Resolvers: ResolverMap = {
-    UserOrExceptions: {
-        __resolveType: (obj): string => (obj.exceptions ? 'Exceptions' : 'User'),
-    },
     Mutation: {
         registerWithPassword: async (
             _,
@@ -31,7 +34,7 @@ export const Resolvers: ResolverMap = {
             if (password === email) e.add(PasswordGuessableException({}));
 
             try {
-                await registerWithPasswordArgumentsValidator.validate(args, { abortEarly: false });
+                await registerWithPasswordArgsValidator.validate(args, { abortEarly: false });
             } catch (validationException) {
                 e.add(ValidationException(validationException));
             }
@@ -79,5 +82,48 @@ export const Resolvers: ResolverMap = {
             e.add(UnknownException());
             return e.exception;
         },
+        changePassword: loginRequired<IDone>()(
+            async (
+                _: any,
+                { oldPassword, newPassword }: GQL.IChangePasswordOnMutationArguments,
+                __: any,
+                ___: any,
+                { user }: LoginRequiredExtra,
+            ) => {
+                const e = new Exception();
+
+                try {
+                    await changePasswordArgsValidator.validate({ oldPassword, newPassword }, { abortEarly: false });
+                } catch (validationException) {
+                    e.add(ValidationException(validationException));
+                }
+                if (e.hasException) return e.exception;
+
+                const credential = await getBasicAuthUsingEmail(user.email);
+                if (credential) {
+                    if (await credential.compare(oldPassword)) {
+                        if (await credential.isOld(newPassword))
+                            e.add(OldPasswordUsedException({ path: 'newPassword' }));
+                        else {
+                            await credential.setPassword(newPassword);
+                            await credential.save();
+                        }
+                    } else if (await credential.isOld(oldPassword))
+                        e.add(OldPasswordUsedException({ path: 'oldPassword' }));
+                    else e.add(InvalidCredentialsException());
+                } else if (!oldPassword) {
+                    const u = await findUserByEmail(user.email);
+                    if (u) {
+                        const auth = new BasicAuth();
+                        auth.user = u;
+                        await auth.setPassword(newPassword);
+                        await auth.save();
+                    } else e.add(UserDoesNotExistException());
+                } else e.add(UnknownException());
+
+                if (e.hasException) return e.exception;
+                return { done: true };
+            },
+        ),
     },
 };

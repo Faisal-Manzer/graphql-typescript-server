@@ -39,6 +39,7 @@ declare namespace GQL {
         registerWithPassword: UserOrExceptions | null;
         loginWithPassword: UserOrExceptions | null;
         resetPassword: UserOrExceptions | null;
+        changePassword: DoneOrExceptions | null;
         logout: boolean | null;
         testRegister: IUser | null;
         testLogin: IUser | null;
@@ -62,6 +63,11 @@ declare namespace GQL {
         email: string;
         otp: number;
         password: string;
+    }
+
+    interface IChangePasswordOnMutationArguments {
+        oldPassword: string;
+        newPassword: string;
     }
 
     interface ILogoutOnMutationArguments {

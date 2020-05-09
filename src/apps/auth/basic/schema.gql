@@ -4,4 +4,5 @@ type Mutation {
     registerWithPassword (email: String!, password: String!, name: String!): UserOrExceptions
     loginWithPassword (email: String!, password: String!): UserOrExceptions
     resetPassword (email: String!, otp: Int!, password: String!): UserOrExceptions
+    changePassword (oldPassword: String, newPassword: String!): DoneOrExceptions
 }

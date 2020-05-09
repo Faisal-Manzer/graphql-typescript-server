@@ -33,7 +33,7 @@ export function loginRequired<ReturnType>({
             };
 
             if (session.user) {
-                let extra = {};
+                let extra = { user: session.user };
                 if (query) {
                     const user = await findUserByEmail(session.user.email);
                     if (checkVerified) {
