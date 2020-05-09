@@ -38,9 +38,11 @@ declare namespace GQL {
         __typename: 'Mutation';
         registerWithPassword: UserOrExceptions | null;
         loginWithPassword: UserOrExceptions | null;
+        resetPassword: UserOrExceptions | null;
         logout: boolean | null;
         testRegister: IUser | null;
         testLogin: IUser | null;
+        testVerify: boolean | null;
         updateName: DoneOrExceptions | null;
         sendConfMail: boolean | null;
     }
@@ -53,6 +55,12 @@ declare namespace GQL {
 
     interface ILoginWithPasswordOnMutationArguments {
         email: string;
+        password: string;
+    }
+
+    interface IResetPasswordOnMutationArguments {
+        email: string;
+        otp: number;
         password: string;
     }
 
@@ -70,6 +78,10 @@ declare namespace GQL {
     }
 
     interface ITestLoginOnMutationArguments {
+        email: string;
+    }
+
+    interface ITestVerifyOnMutationArguments {
         email: string;
     }
 

@@ -114,6 +114,7 @@ export class TestClient {
                 id
                 email
                 name
+                verified
             }
         }`;
         const data = await this.query(query);

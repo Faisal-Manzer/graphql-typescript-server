@@ -14,4 +14,7 @@ export class User extends BaseEntity {
 
     @Column({ default: false })
     verified: boolean;
+
+    @Column({ default: false })
+    locked: boolean;
 }

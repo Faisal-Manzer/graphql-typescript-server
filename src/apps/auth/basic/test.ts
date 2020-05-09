@@ -1,8 +1,8 @@
 /**
  * Auth.Basic will handle password email based authentication.
  *
- * Register
- * Login
+ * Register with password
+ * Login with password
  *
  */
 import { Connection } from 'typeorm';

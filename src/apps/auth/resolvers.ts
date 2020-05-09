@@ -6,7 +6,7 @@ import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
 import { Done, Exception } from 'utils/exceptionGenerator';
 
 import { createVerificationLink, findUserByEmail, loginUser, logOutOfAllSession, register } from './utils';
-import { nameValidator } from './validators';
+import { emailValidator, nameValidator, sendConfMailParmValidator } from './validators';
 
 import { ValidationException } from '../exceptions';
 import { IDone } from '../../types';
@@ -98,16 +98,19 @@ export const Resolvers: ResolverMap = {
             },
         ),
         sendConfMail: async (_, args: GQL.ISendConfMailOnMutationArguments, { host }): Promise<boolean> => {
-            const { email, redirect } = args;
-            const user = await findUserByEmail(email);
-            if (user) {
-                if (user.verified) return false;
-                const link = await createVerificationLink(host, user.id, redirect);
-                await sendMailTask.add({ email, body: link });
-                return true;
+            const { redirect } = args;
+            let email = '';
+
+            try {
+                const data = await sendConfMailParmValidator.validate(args);
+                email = data.email;
+            } catch (e) {
+                return false;
             }
 
-            return false;
+            const link = await createVerificationLink(host, email, redirect);
+            await sendMailTask.add({ email, body: link });
+            return true;
         },
     },
 };

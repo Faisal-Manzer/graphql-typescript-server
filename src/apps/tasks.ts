@@ -6,7 +6,7 @@ export const SEND_MAIL_TASK = 'sendMailTask';
 export const sendMailTask = new Task(SEND_MAIL_TASK, REDIS_URL);
 sendMailTask.process((job) => {
     return new Promise(async (resolve) => {
-        console.log(job.data);
+        if (process.env.NODE_ENV === 'development') console.log(job.data);
         resolve();
     });
 });

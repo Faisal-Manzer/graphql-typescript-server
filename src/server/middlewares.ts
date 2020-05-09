@@ -10,7 +10,7 @@ const client = createClient(REDIS_URL);
 
 const sessionMiddleware = session({
     name: 'clientid',
-    store: new Store({ client, prefix: REDIS_SESSION_PREFIX }),
+    store: new Store({ client, prefix: `${REDIS_SESSION_PREFIX}:` }),
     secret: process.env.SECRET_KEY || '*ib8529gv12+ci*2%c$q0vyhke2!i1stk(*uv@ol7dz+6ho*yk',
     resave: false,
     saveUninitialized: false,

@@ -1,3 +1,9 @@
+/**
+ * Ping is test for working server
+ *
+ * Ping
+ *
+ */
 import { TestClient } from 'utils/testClient';
 
 const pingQuery = (): string => `

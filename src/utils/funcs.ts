@@ -17,7 +17,7 @@ export const toTitleCase = (str: string): string => {
 export const getRedisKeyForValue = async (
     keyPrefix: string,
     find: any,
-    equalityTester: Function,
+    equalityTester: Function = (find: any, value: any): boolean => find === value,
     silent = true,
 ): Promise<string | null> => {
     const keyPattern = `${keyPrefix}:*`;

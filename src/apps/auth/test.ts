@@ -3,23 +3,30 @@
  *
  * Register
  * Logout
+ * Update Name
+ * Send Conf Mail
+ * Me
  *
+ * Find User
  */
+
+import { URL } from 'url';
+
 import { Connection } from 'typeorm';
 import fetch from 'node-fetch';
 
 import { TestClient } from 'utils/testClient';
 import { dbConnect } from 'server/db';
 
-import { findUserByEmail, register, createVerificationLink } from './utils';
-import { toTitleCase } from 'utils/funcs';
+import { findUserByEmail, register, createVerificationLink, getVerificationURL } from './utils';
+import { getRedisKeyForValue, toTitleCase } from 'utils/funcs';
 import { LOGIN_REQUIRED_EXCEPTION, VALIDATION_EXCEPTION } from '../exceptions';
-import { VERIFY_USER_URL } from './views';
 import { USER_NOT_VERIFIED } from './exceptions';
+import { REDIS_VERIFY_USER } from '../../server/constants';
+import { User } from '../entities/User';
 
 let conn: Connection;
 const host = process.env.TEST_HOST || '';
-const hostTrailing = `${host}/`;
 
 beforeAll(async () => {
     conn = await dbConnect();
@@ -204,10 +211,24 @@ describe('update name', () => {
     });
 });
 
+const sendConfMailQuery = (email: string, redirect: string = host) => `
+    mutation {
+        sendConfMail (email: "${email}", redirect: "${redirect}")
+    }
+`;
 describe('verify user', () => {
+    const verifyUser = async (link: string, success: boolean, email: string): Promise<void> => {
+        const response = await fetch(link);
+
+        expect(response.redirected).toEqual(true);
+        const redirect = new URL(response.url);
+        expect(redirect.searchParams.get('success')).toEqual(success.toString());
+        expect(redirect.searchParams.get('email')).toEqual(email);
+    };
+
     test('create same link for same user', async () => {
         const session = new TestClient();
-        const { user } = await session.register();
+        const { user } = await session.register(false);
 
         const link1 = await createVerificationLink(host, user.id, host);
         const link2 = await createVerificationLink(host, user.id, host);
@@ -217,74 +238,122 @@ describe('verify user', () => {
 
     test('create different link for different user', async () => {
         const session = new TestClient();
-        const { user: user1 } = await session.register();
-        const { user: user2 } = await session.register();
+        const { email: email1 } = await session.register(false);
+        const { email: email2 } = await session.register(false);
 
-        const link1 = await createVerificationLink(host, user1.id, host);
-        const link2 = await createVerificationLink(host, user2.id, host);
+        const link1 = await createVerificationLink(host, email1, host);
+        const link2 = await createVerificationLink(host, email2, host);
 
         expect(link1).not.toEqual(link2);
     });
 
     test('random id', async () => {
-        const link = `${host}${VERIFY_USER_URL.replace(':key', 'random-id')}`;
-        const response = await fetch(link);
-
-        expect(response.status).toEqual(400);
-        const obj = await response.json();
-
-        expect(obj.status).toEqual('error');
+        const { email } = TestClient.createCredentials();
+        const link = getVerificationURL(host, email, host);
+        await verifyUser(link, false, '');
     });
 
     test('link confirms', async () => {
         const session = new TestClient();
-        const { user } = await session.register();
+        const { email } = await session.register(false);
 
-        const link = await createVerificationLink(host, user.id, host);
-        const response = await fetch(link);
-
-        expect(response.redirected).toEqual(true);
-        expect(response.url).toEqual(hostTrailing);
+        const link = await createVerificationLink(host, email, host);
+        await verifyUser(link, true, email);
     });
 
     test('link invalidates', async () => {
-        // jest.setTimeout(30000);
         const session = new TestClient();
-        const { user } = await session.register();
+        const { email } = await session.register(false);
 
-        const link = await createVerificationLink(host, user.id, host);
+        const link = await createVerificationLink(host, email, host);
         await fetch(link);
-
-        const response = await fetch(link);
-
-        expect(response.status).toEqual(400);
-        const obj = await response.json();
-
-        expect(obj.status).toEqual('error');
+        await verifyUser(link, false, '');
     });
 
     test('verify non http', async () => {
-        // jest.setTimeout(30000);
         const session = new TestClient();
-        const { user } = await session.register();
+        const { email } = await session.register(false);
 
-        const link = await createVerificationLink(host, user.id, host.replace(/(^\w+:|^)\/\//, ''));
-        const response = await fetch(link);
-
-        expect(response.redirected).toEqual(true);
-        expect(response.url).toEqual(hostTrailing);
+        const link = await createVerificationLink(host, email, host.replace(/(^\w+:|^)\/\//, ''));
+        await verifyUser(link, true, email);
     });
 
-    test('no redirect response', async () => {
+    test('validate redirect', async () => {
         const session = new TestClient();
-        const { user } = await session.register();
+        const { email } = await session.register(false);
+        const { sendConfMail } = await session.query(sendConfMailQuery(email, ''));
+        expect(sendConfMail).toEqual(false);
+    });
 
-        const link = await createVerificationLink(host, user.id);
-        const response = await fetch(link);
+    test('validate email', async () => {
+        const session = new TestClient();
+        await session.register(false);
+        const { sendConfMail } = await session.query(sendConfMailQuery('random-email'));
+        expect(sendConfMail).toEqual(false);
+    });
 
-        expect(response.status).toEqual(200);
-        const obj = await response.json();
+    test('verify using query', async () => {
+        const session = new TestClient();
+        const { email } = await session.register(false);
+        const { sendConfMail } = await session.query(sendConfMailQuery(email));
+        expect(sendConfMail).toEqual(true);
+        const key = await getRedisKeyForValue(REDIS_VERIFY_USER, email);
+        expect(key).not.toEqual(null);
+        if (key) {
+            const link = getVerificationURL(host, key, host);
+            await verifyUser(link, true, email);
+        }
+    });
 
-        expect(obj.status).toEqual('ok');
+    test('verified with db', async () => {
+        const session = new TestClient();
+        const { email } = await session.register(false);
+        const userBefore = (await User.findOne({ where: { email } })) as User;
+        expect(userBefore.verified).toEqual(false);
+
+        await session.query(sendConfMailQuery(email));
+        const key = await getRedisKeyForValue(REDIS_VERIFY_USER, email);
+        const link = getVerificationURL(host, key as string, host);
+        await fetch(link);
+
+        const userAfter = (await User.findOne({ where: { email } })) as User;
+        expect(userAfter.verified).toEqual(true);
+    });
+});
+
+describe('me', () => {
+    test('me is null when not login', async () => {
+        const session = new TestClient();
+        const me = await session.me();
+        expect(me).toEqual(null);
+    });
+
+    test('me is returned for unverified user', async () => {
+        const session = new TestClient();
+        const { email } = await session.register(false);
+        await session.login(email);
+        const { email: meEmail } = await session.me();
+        expect(meEmail).toEqual(email);
+    });
+
+    test('me after login', async () => {
+        const session = new TestClient();
+        const { email } = await session.register();
+        await session.login(email);
+        const { email: meEmail } = await session.me();
+        expect(meEmail).toEqual(email);
+    });
+
+    test('me is null after logout', async () => {
+        const session = new TestClient();
+        const { email } = await session.register();
+
+        await session.login(email);
+        const { email: meEmail } = await session.me();
+        expect(meEmail).toEqual(email);
+
+        await session.logout();
+        const me = await session.me();
+        expect(me).toEqual(null);
     });
 });

@@ -18,3 +18,8 @@ export const registerParmValidator = yup.object().shape({
     email: emailValidator,
     name: nameValidator,
 });
+
+export const sendConfMailParmValidator = yup.object().shape({
+    email: emailValidator,
+    redirect: yup.string().required('Redirect is required').url('Redirect is not a valid url.'),
+});
