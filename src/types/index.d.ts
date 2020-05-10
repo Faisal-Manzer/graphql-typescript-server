@@ -19,6 +19,7 @@ export interface Context {
     request: Request;
     session: Session;
     host: string;
+    ip: string;
 }
 
 export interface IException {

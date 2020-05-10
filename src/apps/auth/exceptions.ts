@@ -17,3 +17,9 @@ export const UserNotVerifiedException = Exception.generator({
     code: USER_NOT_VERIFIED,
     message: 'User not verified. Check your mail box.',
 });
+
+export const RECAPTCHA_NOT_VALID_EXCEPTION = 'RecaptchaNotValidException';
+export const RecaptchaNotValidException = Exception.generator({
+    code: RECAPTCHA_NOT_VALID_EXCEPTION,
+    message: 'Recaptcha not valid or not provided',
+});

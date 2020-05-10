@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+
 import { toTitleCase } from 'utils/funcs';
 
 export const emailValidator = yup

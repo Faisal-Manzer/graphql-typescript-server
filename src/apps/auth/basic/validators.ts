@@ -17,6 +17,7 @@ export const registerWithPasswordArgsValidator = yup.object().shape({
     password: passwordValidator,
     email: emailValidator,
     name: nameValidator,
+    recaptcha: yup.string(),
 });
 
 export const forgotPasswordArgsValidator = yup.object().shape({

@@ -8,8 +8,13 @@ import { Done, Exception } from 'utils/exceptionGenerator';
 import { ValidationException, UnknownException } from 'apps/exceptions';
 import { User } from 'apps/entities/User';
 import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
+import { RecaptchaNotValidException, UserDoesNotExistException } from '../exceptions';
+import { sendMailTask } from 'apps/tasks';
+import { redis } from 'server/redis';
+import { REDIS_FORGOT_PASSWORD_PREFIX } from 'server/constants';
 
 import { findUserByEmail, loginUser, register } from '../utils';
+import { googleRecaptchaValidator } from '../recaptcha';
 
 import {
     InvalidCredentialsException,
@@ -24,19 +29,19 @@ import {
     forgotPasswordArgsValidator,
 } from './validators';
 import { checkCredentials, generateForgotPasswordOTP, getBasicAuthUsingEmail } from './utils';
-import { UserDoesNotExistException } from '../exceptions';
-import { sendMailTask } from '../../tasks';
-import { redis } from '../../../server/redis';
-import { REDIS_FORGOT_PASSWORD_PREFIX } from '../../../server/constants';
 
 export const Resolvers: ResolverMap = {
     Mutation: {
         registerWithPassword: async (
             _,
             args: GQL.IRegisterWithPasswordOnMutationArguments,
+            { ip }: ResolverContext,
         ): Promise<User | IExceptions> => {
             const e = new Exception();
             const { email, password, name } = args;
+
+            if (!(await googleRecaptchaValidator(args?.captcha, ip)))
+                return Exception.new(RecaptchaNotValidException());
 
             if (isCommonPassword(password)) e.add(PasswordGuessableException({}));
             if (password === email) e.add(PasswordGuessableException({}));
@@ -139,7 +144,7 @@ export const Resolvers: ResolverMap = {
         ): Promise<IDone> => {
             const user = await findUserByEmail(email);
             if (user) {
-                const otp = generateForgotPasswordOTP(user.id);
+                const otp = await generateForgotPasswordOTP(user.id);
                 await sendMailTask.add({
                     body: `OTP is ${otp}`,
                     email,

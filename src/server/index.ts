@@ -4,7 +4,6 @@ import { Redis } from 'ioredis';
 import { GraphQLSchema } from 'graphql';
 import { Application } from 'express';
 import { CorsOptions } from 'cors';
-import * as passport from 'passport';
 
 import { GraphQLServer } from 'graphql-yoga';
 
@@ -14,6 +13,7 @@ import { dbConnect } from './db';
 import { redis } from './redis';
 import { generateSchema, hookViews } from './schema';
 import { middlewares } from './middlewares';
+import { corsOrigins } from './cors';
 
 export class Server {
     db: Connection;
@@ -53,7 +53,7 @@ export class Server {
     }
 
     getCorsSettings(): CorsOptions {
-        return { credentials: true, origin: [] };
+        return { credentials: true, origin: corsOrigins };
     }
 
     getServerContext({ request }: ContextProvider): Context {
@@ -62,6 +62,7 @@ export class Server {
             request,
             host: `${request.protocol}://${request.get('host')}`,
             session: request.session,
+            ip: request.ip,
         };
     }
 

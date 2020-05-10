@@ -53,6 +53,7 @@ declare namespace GQL {
         email: string;
         password: string;
         name: string;
+        captcha?: string | null;
     }
 
     interface ILoginWithPasswordOnMutationArguments {

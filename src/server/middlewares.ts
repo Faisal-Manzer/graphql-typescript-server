@@ -1,10 +1,11 @@
 import * as session from 'express-session';
+import * as RateLimit from 'express-rate-limit';
+import * as RateLimitRedisStore from 'rate-limit-redis';
+import * as passport from 'passport';
+import * as ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
 
-import * as ConnectRedis from 'connect-redis';
-
 import { REDIS_SESSION_PREFIX, REDIS_URL } from './constants';
-import * as passport from 'passport';
 
 const Store = ConnectRedis(session);
 const client = createClient(REDIS_URL);
@@ -22,6 +23,16 @@ const sessionMiddleware = session({
     },
 });
 
+// @ts-ignore
+const rateLimit = new RateLimit({
+    store: new RateLimitRedisStore({
+        client,
+    }),
+    windowMs: 1 * 60 * 1000,
+    max: process.env.NODE_ENV === 'test' ? 0 : 15,
+    message: 'Too many request from this IP. Wait for some time to start again.',
+});
+
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
@@ -30,4 +41,4 @@ passport.deserializeUser(function (user, done) {
     done(null, user);
 });
 
-export const middlewares: Array<any> = [sessionMiddleware, passport.initialize()];
+export const middlewares: Array<any> = [sessionMiddleware, passport.initialize(), rateLimit];
