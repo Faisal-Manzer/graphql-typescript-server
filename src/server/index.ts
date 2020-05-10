@@ -4,6 +4,7 @@ import { Redis } from 'ioredis';
 import { GraphQLSchema } from 'graphql';
 import { Application } from 'express';
 import { CorsOptions } from 'cors';
+import * as passport from 'passport';
 
 import { GraphQLServer } from 'graphql-yoga';
 

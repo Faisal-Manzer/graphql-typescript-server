@@ -32,10 +32,11 @@ export const hookViews = (express: Application): any => {
     );
 
     patterns.map((app) => {
-        app.map((pattern: any) => {
-            const [url, view, method = 'get'] = pattern;
-            // @ts-ignore
-            express[method](url, view);
-        });
+        for (const method in app) {
+            if (app.hasOwnProperty(method)) {
+                // @ts-ignore
+                app[method].map((viewConf) => express[method](...viewConf));
+            }
+        }
     });
 };

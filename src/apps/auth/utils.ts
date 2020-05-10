@@ -11,11 +11,11 @@ import { registerParmValidator } from './validators';
 import { UserExistsException } from './exceptions';
 import { VERIFY_USER_URL } from './views';
 
-type RegisterParams = {
+export interface RegisterParams {
     email: string;
     name: string;
     redirectAfterVerification?: string;
-};
+}
 
 export const findUserByEmail = async (email: string): Promise<User | undefined> => {
     return await User.findOne({ where: { email: email.toLowerCase() } });
@@ -66,4 +66,10 @@ export const createVerificationLink = async (host: string, email: string, redire
     const key = uuid();
     await redis.set(`${REDIS_VERIFY_USER}:${key}`, email, 'ex', 60 * 15);
     return getVerificationURL(host, key, redirect);
+};
+
+export const findOrRegisterUser = async (email: string, name: string): Promise<User | null> => {
+    const userInDB = await findUserByEmail(email);
+    if (userInDB) return userInDB;
+    else return await register({ email, name });
 };

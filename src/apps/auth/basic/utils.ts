@@ -19,13 +19,13 @@ export const checkCredentials = async (email: string, password: string): Promise
     const auth = await getBasicAuthUsingEmail(email);
 
     if (!auth) throw UserDoesNotExistException();
-    if (await auth.compare(password)) return auth.user;
+    if (await auth.verifyPassword(password)) return auth.user;
     else if (await auth.isOld(password)) throw OldPasswordUsedException();
     else throw InvalidCredentialsException();
 };
 
 export const generateForgotPasswordOTP = async (userId: string): Promise<number> => {
-    const otp = getRandomInt(10000, 999999);
+    const otp = getRandomInt(100000, 999999);
     const previousKey = await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${userId}`);
     if (previousKey) return JSON.parse(previousKey);
 

@@ -24,7 +24,7 @@ export class BasicAuth extends BaseEntity {
         this.password = await bcrypt.hash(password, 10);
     }
 
-    async compare(password: string): Promise<boolean> {
+    async verifyPassword(password: string): Promise<boolean> {
         return await bcrypt.compare(password, this.password);
     }
 

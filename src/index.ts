@@ -11,6 +11,6 @@ import { AddressInfo } from 'net';
 dotEnvConfig();
 const server = new Server({}, 4000);
 server.start().then((app) => {
-    const { port, address } = app.address() as AddressInfo;
-    console.log(`Started server ${address} at http://localhost:${port}`);
+    const { port } = app.address() as AddressInfo;
+    console.log(`Started server at http://localhost:${port}`);
 });

@@ -4,6 +4,7 @@ import { createClient } from 'redis';
 import * as ConnectRedis from 'connect-redis';
 
 import { REDIS_SESSION_PREFIX, REDIS_URL } from './constants';
+import * as passport from 'passport';
 
 const Store = ConnectRedis(session);
 const client = createClient(REDIS_URL);
@@ -21,4 +22,12 @@ const sessionMiddleware = session({
     },
 });
 
-export const middlewares: Array<any> = [sessionMiddleware];
+passport.serializeUser(function (user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+    done(null, user);
+});
+
+export const middlewares: Array<any> = [sessionMiddleware, passport.initialize()];

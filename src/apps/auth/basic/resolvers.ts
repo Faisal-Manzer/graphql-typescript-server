@@ -109,7 +109,7 @@ export const Resolvers: ResolverMap = {
 
                 const credential = await getBasicAuthUsingEmail(user.email);
                 if (credential && oldPassword) {
-                    if (await credential.compare(oldPassword)) {
+                    if (await credential.verifyPassword(oldPassword)) {
                         if (await credential.isOld(newPassword))
                             e.add(OldPasswordUsedException({ path: 'newPassword' }));
                         else {

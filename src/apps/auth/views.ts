@@ -7,13 +7,13 @@ import { addHttp } from 'utils/funcs';
 
 import { User } from '../entities/User';
 
-export const VERIFY_USER_URL = '/auth/user/verify/:key';
-export const verifyUser = async (request: Request, response: Response): Promise<any> => {
+export const VERIFY_USER_URL = '/auth/verify/:key';
+export const verifyUser = async (req: Request, res: Response): Promise<any> => {
     let success = false;
     let message = '';
 
-    const { key: id } = request.params;
-    const redirect = request.query.redirect as string;
+    const { key: id } = req.params;
+    const redirect = req.query.redirect as string;
 
     const key = `${REDIS_VERIFY_USER}:${id}`;
     const email = await redis.get(key);
@@ -29,7 +29,9 @@ export const verifyUser = async (request: Request, response: Response): Promise<
     url.searchParams.append('email', email || '');
     url.searchParams.append('success', success.toString());
     url.searchParams.append('message', message);
-    response.redirect(url.href);
+    res.redirect(url.href);
 };
 
-export const urlPatterns = [[VERIFY_USER_URL, verifyUser]];
+export const urlPatterns = {
+    get: [[VERIFY_USER_URL, verifyUser]],
+};
