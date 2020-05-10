@@ -11,15 +11,23 @@ import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
 
 import { findUserByEmail, loginUser, register } from '../utils';
 
-import { InvalidCredentialsException, OldPasswordUsedException, PasswordGuessableException } from './exceptions';
+import {
+    InvalidCredentialsException,
+    InvalidOTPException,
+    OldPasswordUsedException,
+    PasswordGuessableException,
+} from './exceptions';
 import { BasicAuth } from './entities/BasicAuth';
 import {
     changePasswordArgsValidator,
     registerWithPasswordArgsValidator,
-    resetPasswordArgsValidator,
+    forgotPasswordArgsValidator,
 } from './validators';
-import { checkCredentials, getBasicAuthUsingEmail } from './utils';
+import { checkCredentials, generateForgotPasswordOTP, getBasicAuthUsingEmail } from './utils';
 import { UserDoesNotExistException } from '../exceptions';
+import { sendMailTask } from '../../tasks';
+import { redis } from '../../../server/redis';
+import { REDIS_FORGOT_PASSWORD_PREFIX } from '../../../server/constants';
 
 export const Resolvers: ResolverMap = {
     Mutation: {
@@ -100,7 +108,7 @@ export const Resolvers: ResolverMap = {
                 if (e.hasException) return e.exception;
 
                 const credential = await getBasicAuthUsingEmail(user.email);
-                if (credential) {
+                if (credential && oldPassword) {
                     if (await credential.compare(oldPassword)) {
                         if (await credential.isOld(newPassword))
                             e.add(OldPasswordUsedException({ path: 'newPassword' }));
@@ -122,8 +130,56 @@ export const Resolvers: ResolverMap = {
                 } else e.add(UnknownException());
 
                 if (e.hasException) return e.exception;
-                return { done: true };
+                return Done();
             },
         ),
+        sendForgotPasswordMail: async (
+            _,
+            { email }: GQL.ISendForgotPasswordMailOnMutationArguments,
+        ): Promise<IDone> => {
+            const user = await findUserByEmail(email);
+            if (user) {
+                const otp = generateForgotPasswordOTP(user.id);
+                await sendMailTask.add({
+                    body: `OTP is ${otp}`,
+                    email,
+                });
+            }
+            return Done();
+        },
+        forgotPassword: async (_, args: GQL.IForgotPasswordOnMutationArguments): Promise<IExceptions | User> => {
+            const e = new Exception();
+
+            try {
+                await forgotPasswordArgsValidator.validate(args, { abortEarly: false });
+            } catch (validationException) {
+                e.add(ValidationException(validationException));
+            }
+            if (e.hasException) return e.exception;
+
+            const { email, password, otp } = args;
+            let user;
+            let auth;
+
+            auth = await getBasicAuthUsingEmail(email);
+            if (auth) {
+                user = auth.user;
+            } else {
+                user = await findUserByEmail(email);
+                if (user) auth = new BasicAuth();
+                else e.add(UserDoesNotExistException());
+            }
+
+            if (auth && user) {
+                const redisOtp = (await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${user.id}`)) || '';
+                if (otp === JSON.parse(redisOtp)) {
+                    await auth.setPassword(password);
+                    await auth.save();
+                    return user as User;
+                } else e.add(InvalidOTPException());
+            }
+
+            return e.exception;
+        },
     },
 };

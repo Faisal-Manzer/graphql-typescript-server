@@ -71,7 +71,7 @@
   "scripts": {
     "start": "NODE_ENV=development NODE_PATH=src nodemon --exec ts-node --files src/index.ts",
     "lint": "eslint '*/**/*.{js,ts,json}' --fix",
-    "test": "NODE_ENV=test NODE_PATH=src TS_NODE_FILES=true jest -i --forceExit --verbose",
+    "test": "NODE_ENV=test NODE_PATH=src TS_NODE_FILES=true jest -i --forceExit",
     "db": "TS_NODE_TRANSPILE_ONLY=true NODE_PATH=src ts-node ./node_modules/typeorm/cli.js --config ormconfig.ts",
     "gen-schema-types": "NODE_PATH=src ts-node ./lib/generateGQLTypes.ts"
   },

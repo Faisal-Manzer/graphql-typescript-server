@@ -11,8 +11,7 @@ export const otpValidator = yup
     .number()
     .required('Otp is required')
     .integer('Otp must be integer')
-    .max(6, 'Otp should be 6 digit')
-    .min(6, 'Otp should be 6 digit');
+    .test('len', 'Otp should be of 6 digit', (val) => val.toString().length === 6);
 
 export const registerWithPasswordArgsValidator = yup.object().shape({
     password: passwordValidator,
@@ -20,7 +19,7 @@ export const registerWithPasswordArgsValidator = yup.object().shape({
     name: nameValidator,
 });
 
-export const resetPasswordArgsValidator = yup.object().shape({
+export const forgotPasswordArgsValidator = yup.object().shape({
     email: emailValidator,
     password: passwordValidator,
     otp: otpValidator,

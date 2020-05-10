@@ -25,3 +25,10 @@ export const NoCredentialsFoundException = Exception.generator({
     code: NO_CREDENTIALS_FOUND_EXCEPTION,
     message: 'No credentials found for given account',
 });
+
+export const INVALID_OTP_EXCEPTION = 'InvalidOTPException';
+export const InvalidOTPException = Exception.generator({
+    code: INVALID_OTP_EXCEPTION,
+    message: 'OTP entered is wrong',
+    path: 'otp',
+});
