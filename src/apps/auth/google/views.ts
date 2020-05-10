@@ -3,21 +3,27 @@ import * as passport from 'passport';
 
 import { OAuth, OAuthAuthenticate, OAuthCallback } from '../oauth.utils';
 
-OAuth(Strategy, {
-    clientID: process.env.GOOGLE_CLIENT_ID as string,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    callbackURL: 'http://localhost:4000/auth/google/callback',
-});
+let views: any[] = [];
 
 export const GOOGLE_OAUTH_URL = '/auth/google/';
-const OAuthView = OAuthAuthenticate('google', { scope: ['profile', 'email'] });
-
 export const GOOGLE_OAUTH_CALLBACK_URL = '/auth/google/callback/';
-const authenticate = passport.authenticate('google');
 
-export const urlPatterns = {
-    get: [
+if (process.env.GOOGLE_CLIENT_ID) {
+    OAuth(Strategy, {
+        clientID: process.env.GOOGLE_CLIENT_ID as string,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        callbackURL: 'http://localhost:4000/auth/google/callback',
+    });
+
+    const OAuthView = OAuthAuthenticate('google', { scope: ['profile', 'email'] });
+
+    const authenticate = passport.authenticate('google');
+
+    views = [
         [GOOGLE_OAUTH_URL, OAuthView],
         [GOOGLE_OAUTH_CALLBACK_URL, authenticate, OAuthCallback],
-    ],
+    ];
+}
+export const urlPatterns = {
+    get: views,
 };
