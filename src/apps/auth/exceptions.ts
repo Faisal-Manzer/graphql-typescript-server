@@ -23,3 +23,9 @@ export const RecaptchaNotValidException = Exception.generator({
     code: RECAPTCHA_NOT_VALID_EXCEPTION,
     message: 'Recaptcha not valid or not provided',
 });
+
+export const ACCOUNT_LOCKED_EXCEPTION = 'AccountLockedException';
+export const AccountLockedException = Exception.generator({
+    code: ACCOUNT_LOCKED_EXCEPTION,
+    message: 'Your account is locked',
+});

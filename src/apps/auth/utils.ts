@@ -44,6 +44,10 @@ export const loginUser = async (session: Session, user: User): Promise<boolean> 
     try {
         if (user.locked) return false;
         session.user = user;
+        if (user.failedAttempts > 0) {
+            user.failedAttempts = 0;
+            await user.save();
+        }
         await redis.lpush(`${REDIS_USER_SESSION_PREFIX}:${user.id}`, session.id);
         return true;
     } catch (e) {
@@ -72,4 +76,38 @@ export const findOrRegisterUser = async (email: string, name: string): Promise<U
     const userInDB = await findUserByEmail(email);
     if (userInDB) return userInDB;
     else return await register({ email, name });
+};
+
+export const lockingTime = {
+    '5': 1000 * 30,
+    '10': 1000 * 60 * 10,
+    '14': 1000 * 60 * 15,
+    '17': 1000 * 60 * 30,
+    '19': 1000 * 60 * 60,
+    '20': 1000 * 60 * 24,
+};
+
+export const lockAccount = async (email: string): Promise<void> => {
+    const user = await findUserByEmail(email);
+    if (user) {
+        if (!user.locked) {
+            let failedAttempts = user.failedAttempts + 1;
+
+            if (lockingTime.hasOwnProperty(`${failedAttempts}`)) {
+                console.log('LOCKING ACCOUNT');
+                user.locked = true;
+
+                const { unLockAccountTask } = await require('./tasks');
+                await unLockAccountTask.add(
+                    { email: user.email },
+                    // @ts-ignore
+                    { delay: lockingTime[`${failedAttempts}`] },
+                );
+                if (failedAttempts === 17) failedAttempts = 0;
+            }
+
+            user.failedAttempts = failedAttempts;
+            await user.save();
+        }
+    }
 };

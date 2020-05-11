@@ -3,12 +3,13 @@ import { redis } from 'server/redis';
 import { REDIS_FORGOT_PASSWORD_PREFIX } from 'server/constants';
 import { getRandomInt } from 'utils/funcs';
 
-import { UserDoesNotExistException } from '../exceptions';
+import { AccountLockedException, UserDoesNotExistException } from '../exceptions';
 
 import { InvalidCredentialsException, OldPasswordUsedException } from './exceptions';
 import { BasicAuth } from './entities/BasicAuth';
 
 export const getBasicAuthUsingEmail = async (email: string): Promise<BasicAuth | undefined> => {
+    email = email.toLowerCase();
     return await BasicAuth.createQueryBuilder('auth')
         .leftJoinAndSelect('auth.user', 'user')
         .where('user.email = :email', { email })
@@ -19,6 +20,7 @@ export const checkCredentials = async (email: string, password: string): Promise
     const auth = await getBasicAuthUsingEmail(email);
 
     if (!auth) throw UserDoesNotExistException();
+    if (auth.user.locked) throw AccountLockedException();
     if (await auth.verifyPassword(password)) return auth.user;
     else if (await auth.isOld(password)) throw OldPasswordUsedException();
     else throw InvalidCredentialsException();

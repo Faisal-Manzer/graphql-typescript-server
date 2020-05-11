@@ -32,3 +32,9 @@ export const InvalidOTPException = Exception.generator({
     message: 'OTP entered is wrong',
     path: 'otp',
 });
+
+export const RESET_FAILED_ATTEMPT_EXCEPTION = 'ResetFailedAttemptException';
+export const ResetFailedAttemptException = Exception.generator({
+    code: RESET_FAILED_ATTEMPT_EXCEPTION,
+    message: 'You have reached maximum limit of failed attempt',
+});

@@ -8,12 +8,12 @@ import { Done, Exception } from 'utils/exceptionGenerator';
 import { ValidationException, UnknownException } from 'apps/exceptions';
 import { User } from 'apps/entities/User';
 import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
-import { RecaptchaNotValidException, UserDoesNotExistException } from '../exceptions';
+import { ACCOUNT_LOCKED_EXCEPTION, RecaptchaNotValidException, UserDoesNotExistException } from '../exceptions';
 import { sendMailTask } from 'apps/tasks';
 import { redis } from 'server/redis';
 import { REDIS_FORGOT_PASSWORD_PREFIX } from 'server/constants';
 
-import { findUserByEmail, loginUser, register } from '../utils';
+import { findUserByEmail, loginUser, register, lockAccount } from '../utils';
 import { googleRecaptchaValidator } from '../recaptcha';
 
 import {
@@ -21,6 +21,7 @@ import {
     InvalidOTPException,
     OldPasswordUsedException,
     PasswordGuessableException,
+    ResetFailedAttemptException,
 } from './exceptions';
 import { BasicAuth } from './entities/BasicAuth';
 import {
@@ -29,6 +30,8 @@ import {
     forgotPasswordArgsValidator,
 } from './validators';
 import { checkCredentials, generateForgotPasswordOTP, getBasicAuthUsingEmail } from './utils';
+import { resetOtpMaxLimitTask } from './tasks';
+import { TestClient } from '../../../utils/testClient';
 
 export const Resolvers: ResolverMap = {
     Mutation: {
@@ -84,8 +87,10 @@ export const Resolvers: ResolverMap = {
                 user = (await checkCredentials(email, password)) as User;
             } catch (exception) {
                 e.add(exception);
+                console.log('aEXE', exception.code);
+                if (exception.code !== ACCOUNT_LOCKED_EXCEPTION) await lockAccount(email);
+                return e.exception;
             }
-            if (e.hasException) return e.exception;
 
             if (user) {
                 await loginUser(session, user);
@@ -176,12 +181,27 @@ export const Resolvers: ResolverMap = {
             }
 
             if (auth && user) {
-                const redisOtp = (await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${user.id}`)) || '';
-                if (otp === JSON.parse(redisOtp)) {
-                    await auth.setPassword(password);
-                    await auth.save();
-                    return user as User;
-                } else e.add(InvalidOTPException());
+                const redisOtp = await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${user.id}`);
+                const resetPasswordFailed = auth.resetPasswordFailed || 0;
+
+                if (resetPasswordFailed < 5)
+                    if (redisOtp && otp === JSON.parse(redisOtp)) {
+                        await auth.setPassword(password);
+                        await auth.save();
+                        await redis.del(`${REDIS_FORGOT_PASSWORD_PREFIX}:${user.id}`);
+                        return user as User;
+                    } else {
+                        auth.resetPasswordFailed = resetPasswordFailed + 1;
+                        if (!auth.password) {
+                            const { password } = TestClient.createCredentials();
+                            await auth.setPassword(password);
+                        }
+                        await auth.save();
+                        if (resetPasswordFailed === 4)
+                            await resetOtpMaxLimitTask.add({ email }, { delay: 1000 * 60 * 60 * 24 });
+                        e.add(InvalidOTPException());
+                    }
+                else e.add(ResetFailedAttemptException());
             }
 
             return e.exception;

@@ -105,6 +105,7 @@ export const Resolvers: ResolverMap = {
                 const data = await sendConfMailParmValidator.validate(args);
                 email = data.email;
             } catch (e) {
+                console.log(e);
                 return false;
             }
 

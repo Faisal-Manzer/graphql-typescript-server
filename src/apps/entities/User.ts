@@ -17,4 +17,7 @@ export class User extends BaseEntity {
 
     @Column({ default: false })
     locked: boolean;
+
+    @Column('int', { default: 0 })
+    failedAttempts: number;
 }
