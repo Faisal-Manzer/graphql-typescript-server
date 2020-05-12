@@ -1,0 +1,6 @@
+# import UserOrExceptions from 'apps/common.gql'
+
+type Mutation {
+    sendForgotPasswordMail (email: String!): Done
+    forgotPassword (email: String!, otp: Int!, password: String!): UserOrExceptions
+}

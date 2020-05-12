@@ -1,0 +1,5 @@
+# import UserOrExceptions from 'apps/common.gql'
+
+type Mutation {
+    changePassword (oldPassword: String, newPassword: String!): DoneOrExceptions @loginRequired(exception: true)
+}

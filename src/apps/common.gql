@@ -1,6 +1,8 @@
 scalar UUID
 scalar any
 
+directive @loginRequired(exception: Boolean = false, verified: Boolean = true) on FIELD_DEFINITION
+
 type Exception {
     path: String,
     message: String,
@@ -17,7 +19,7 @@ type Done {
 }
 
 type User {
-    id: UUID!,
+    id: ID,
     email: String,
     name: String,
     verified: Boolean

@@ -13,6 +13,7 @@ const client = createClient(REDIS_URL);
 
 const sessionMiddleware = session({
     name: 'clientid',
+    // @ts-ignore
     store: new Store({ client, prefix: `${REDIS_SESSION_PREFIX}:` }),
     secret: process.env.SECRET_KEY || '*ib8529gv12+ci*2%c$q0vyhke2!i1stk(*uv@ol7dz+6ho*yk',
     resave: false,
@@ -27,6 +28,7 @@ const sessionMiddleware = session({
 // @ts-ignore
 const rateLimit = new RateLimit({
     store: new RateLimitRedisStore({
+        // @ts-ignore
         client,
         prefix: REDIS_RATE_LIMIT,
     }),
@@ -41,6 +43,7 @@ const slowDown = new SlowDown({
     delayAfter: 20,
     delayMs: process.env.NODE_ENV === 'test' ? 0 : 500,
     store: new RateLimitRedisStore({
+        // @ts-ignore
         client,
         prefix: REDIS_SLOW_DOWN,
     }),

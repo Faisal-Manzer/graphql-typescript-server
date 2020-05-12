@@ -1,0 +1,5 @@
+# import UserOrExceptions from 'apps/common.gql'
+
+type Mutation {
+    login (email: String!, password: String!): UserOrExceptions
+}

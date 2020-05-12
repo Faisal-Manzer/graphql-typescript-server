@@ -1,0 +1,5 @@
+# import User from 'apps/common.gql'
+
+type Mutation {
+    logout (fromAll: Boolean = false): Boolean @loginRequired(verified: false)
+}

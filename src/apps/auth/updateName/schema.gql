@@ -1,0 +1,5 @@
+# import User from 'apps/common.gql'
+
+type Mutation {
+    updateName (name: String!): DoneOrExceptions @loginRequired(exception: true)
+}

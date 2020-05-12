@@ -1,0 +1,8 @@
+# import User from 'apps/common.gql'
+directive @testOnly on FIELD_DEFINITION
+
+type Mutation {
+    testRegister (email: String!, name: String!, verify: Boolean): User @testOnly
+    testLogin (email: String!): User @testOnly
+    testVerify (email: String!): Boolean @testOnly
+}

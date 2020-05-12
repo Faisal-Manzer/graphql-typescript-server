@@ -1,13 +1,12 @@
-import { URL } from 'url';
-
 import { Request, Response } from 'express';
+
 import { redis } from 'server/redis';
 import { REDIS_VERIFY_USER } from 'server/constants';
-import { addHttp } from 'utils/funcs';
 
-import { User } from '../entities/User';
+import { User } from 'apps/entities/User';
+import { VERIFY_USER_URL } from 'apps/auth/constants';
+import { redirectUrl } from '../utils';
 
-export const VERIFY_USER_URL = '/auth/verify/:key';
 export const verifyUser = async (req: Request, res: Response): Promise<any> => {
     let success = false;
     let message = '';
@@ -24,12 +23,7 @@ export const verifyUser = async (req: Request, res: Response): Promise<any> => {
         if (affected && affected > 0) [success, message] = [true, 'Email successfully verified'];
         else message = 'No such email found';
     } else message = 'The link either expired or invalid';
-
-    const url = new URL(addHttp(redirect));
-    url.searchParams.append('email', email || '');
-    url.searchParams.append('success', success.toString());
-    url.searchParams.append('message', message);
-    res.redirect(url.href);
+    res.redirect(redirectUrl(redirect, email, success, message));
 };
 
 export default {

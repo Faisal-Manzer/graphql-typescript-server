@@ -12,6 +12,7 @@ export interface ResolverContext {
     session: Session;
     ip: string;
     request: Request;
+    user: User;
 }
 
 export type Resolver = (parent: any, args: any, context: ResolverContext, info: any, extra?: any) => any;

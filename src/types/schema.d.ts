@@ -23,12 +23,16 @@ declare namespace GQL {
     interface IQuery {
         __typename: 'Query';
         me: IUser | null;
+
+        /**
+         * Use ping to test server uptime
+         */
         ping: string;
     }
 
     interface IUser {
         __typename: 'User';
-        id: any;
+        id: string | null;
         email: string | null;
         name: string | null;
         verified: boolean | null;
@@ -36,29 +40,26 @@ declare namespace GQL {
 
     interface IMutation {
         __typename: 'Mutation';
-        registerWithPassword: UserOrExceptions | null;
-        loginWithPassword: UserOrExceptions | null;
+        login: UserOrExceptions | null;
+        register: UserOrExceptions | null;
         changePassword: DoneOrExceptions | null;
         sendForgotPasswordMail: IDone | null;
         forgotPassword: UserOrExceptions | null;
         logout: boolean | null;
-        testRegister: IUser | null;
-        testLogin: IUser | null;
-        testVerify: boolean | null;
         updateName: DoneOrExceptions | null;
-        sendConfMail: boolean | null;
+        sendVerificationEmail: boolean | null;
     }
 
-    interface IRegisterWithPasswordOnMutationArguments {
+    interface ILoginOnMutationArguments {
+        email: string;
+        password: string;
+    }
+
+    interface IRegisterOnMutationArguments {
         email: string;
         password: string;
         name: string;
         captcha?: string | null;
-    }
-
-    interface ILoginWithPasswordOnMutationArguments {
-        email: string;
-        password: string;
     }
 
     interface IChangePasswordOnMutationArguments {
@@ -83,25 +84,11 @@ declare namespace GQL {
         fromAll?: boolean | null;
     }
 
-    interface ITestRegisterOnMutationArguments {
-        email: string;
-        name: string;
-        verify?: boolean | null;
-    }
-
-    interface ITestLoginOnMutationArguments {
-        email: string;
-    }
-
-    interface ITestVerifyOnMutationArguments {
-        email: string;
-    }
-
     interface IUpdateNameOnMutationArguments {
         name: string;
     }
 
-    interface ISendConfMailOnMutationArguments {
+    interface ISendVerificationEmailOnMutationArguments {
         email: string;
         redirect: string;
     }

@@ -4,13 +4,15 @@ import { v4 as uuid } from 'uuid';
 import { User } from 'apps/entities/User';
 import { ValidationException } from 'apps/exceptions';
 import { redis } from 'server/redis';
-import { getRedisKeyForValue } from 'utils/funcs';
+import { addHttp, getRedisKeyForValue } from 'utils/funcs';
 import { REDIS_SESSION_PREFIX, REDIS_USER_SESSION_PREFIX, REDIS_VERIFY_USER } from 'server/constants';
+
+import { findUserByEmail } from 'apps/utils';
 
 import { registerParmValidator } from './validators';
 import { UserExistsException } from './exceptions';
-import { VERIFY_USER_URL } from './views';
-import { findUserByEmail } from '../utils';
+import { VERIFY_USER_URL } from './constants';
+import { URL } from 'url';
 
 export interface RegisterParams {
     email: string;
@@ -40,7 +42,7 @@ export const register = async (params: RegisterParams): Promise<User> => {
 export const loginUser = async (session: Session, user: User): Promise<boolean> => {
     try {
         if (user.locked) return false;
-        session.user = user;
+        session.userId = user.id;
         if (user.failedAttempts > 0) {
             user.failedAttempts = 0;
             await user.save();
@@ -107,4 +109,12 @@ export const lockAccount = async (email: string): Promise<void> => {
             await user.save();
         }
     }
+};
+
+export const redirectUrl = (redirect: string, email: string | null, success: boolean, message: string): string => {
+    const url = new URL(addHttp(redirect));
+    url.searchParams.append('email', email || '');
+    url.searchParams.append('success', success.toString());
+    url.searchParams.append('message', message);
+    return url.href;
 };

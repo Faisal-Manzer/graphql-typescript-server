@@ -1,10 +1,9 @@
 import { Response } from 'express';
-import { URL } from 'url';
+import * as passport from 'passport';
 
 import { Request } from 'types';
-import { addHttp } from 'utils/funcs';
-import * as passport from 'passport';
-import { findOrRegisterUser, RegisterParams } from './utils';
+
+import { findOrRegisterUser, redirectUrl, RegisterParams } from './utils';
 
 const defaultGetUserCredentials = (profile: any): RegisterParams => ({
     email: profile.emails[0].value,
@@ -47,13 +46,8 @@ export const OAuthCallback = (req: Request, res: Response): void => {
         email = req.session.user.email;
     }
 
-    if (redirect) {
-        const url = new URL(addHttp(redirect));
-        url.searchParams.append('email', email || '');
-        url.searchParams.append('success', success.toString());
-        url.searchParams.append('message', !success ? req.session.err : 'Login success');
-        res.redirect(url.href);
-    } else {
+    if (redirect) res.redirect(redirectUrl(redirect, email, success, !success ? req.session.err : 'Login success'));
+    else {
         if (success) res.send(`Welcome ${req.session.user.name}`);
         else res.send('Login failed');
     }

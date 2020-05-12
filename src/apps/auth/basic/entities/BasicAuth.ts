@@ -18,7 +18,7 @@ export class BasicAuth extends BaseEntity {
     oldPasswords: string[];
 
     @Column('int', { default: 0 })
-    resetPasswordFailed: number;
+    forgotPasswordFailed: number;
 
     async setPassword(password: string): Promise<void> {
         const oldPassword = this.password;

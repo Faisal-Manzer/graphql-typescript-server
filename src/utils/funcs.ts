@@ -46,9 +46,6 @@ export const getRandomInt = (min: number, max: number): number => {
 };
 
 export const millisecondsToStr = (milliseconds: number): string => {
-    // TIP: to find current time in milliseconds, use:
-    // var  current_time_milliseconds = new Date().getTime();
-
     const numberEnding = (number: number): string => {
         return number > 1 ? 's' : '';
     };
@@ -59,7 +56,6 @@ export const millisecondsToStr = (milliseconds: number): string => {
         return years + ' year' + numberEnding(years);
     }
 
-    //TODO: Months! Maybe weeks?
     const days = Math.floor((temp %= 31536000) / 86400);
     if (days) {
         return days + ' day' + numberEnding(days);

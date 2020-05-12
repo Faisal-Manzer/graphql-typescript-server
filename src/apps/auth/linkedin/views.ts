@@ -1,7 +1,7 @@
 import { Strategy } from 'passport-linkedin-oauth2';
 import * as passport from 'passport';
 
-import { OAuth, OAuthAuthenticate, OAuthCallback } from '../oauth.utils';
+import { OAuth, OAuthAuthenticate, OAuthCallback } from 'apps/auth/oauth.utils';
 
 let views: any[] = [];
 

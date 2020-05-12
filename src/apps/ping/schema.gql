@@ -1,3 +1,4 @@
 type Query {
+    "Use ping to test server uptime"
     ping: String!
 }

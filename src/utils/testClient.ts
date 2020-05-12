@@ -128,4 +128,13 @@ export class TestClient {
         }`;
         await this.query(query);
     }
+
+    async verifyUser(email: string): Promise<boolean> {
+        const query = `
+        mutation { 
+            testVerify (email: "${email}")
+        }`;
+        const { testVerify } = await this.query(query);
+        return testVerify as boolean;
+    }
 }
