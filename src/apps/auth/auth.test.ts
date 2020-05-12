@@ -18,12 +18,12 @@ import fetch from 'node-fetch';
 import { TestClient } from 'utils/testClient';
 import { dbConnect } from 'server/db';
 
-import { findUserByEmail, register, createVerificationLink, getVerificationURL } from './utils';
+import { register, createVerificationLink, getVerificationURL } from './utils';
 import { getRedisKeyForValue, toTitleCase } from 'utils/funcs';
-import { LOGIN_REQUIRED_EXCEPTION, VALIDATION_EXCEPTION } from '../exceptions';
-import { USER_NOT_VERIFIED } from './exceptions';
+import { LOGIN_REQUIRED_EXCEPTION, USER_NOT_VERIFIED, VALIDATION_EXCEPTION } from '../exceptions';
 import { REDIS_VERIFY_USER } from '../../server/constants';
 import { User } from '../entities/User';
+import { findUserByEmail } from '../utils';
 
 let conn: Connection;
 const host = process.env.TEST_HOST || '';
@@ -211,9 +211,9 @@ describe('update name', () => {
     });
 });
 
-const sendConfMailQuery = (email: string, redirect: string = host) => `
+const sendConfMailQuery = (email: string, redirect: string = host): string => `
     mutation {
-        sendConfMail (email: "${email}", redirect: "${redirect}")
+        sendVerificationEmail (email: "${email}", redirect: "${redirect}")
     }
 `;
 describe('verify user', () => {
@@ -281,22 +281,22 @@ describe('verify user', () => {
     test('validate redirect', async () => {
         const session = new TestClient();
         const { email } = await session.register(false);
-        const { sendConfMail } = await session.query(sendConfMailQuery(email, ''));
-        expect(sendConfMail).toEqual(false);
+        const { sendVerificationEmail } = await session.query(sendConfMailQuery(email, ''));
+        expect(sendVerificationEmail).toEqual(false);
     });
 
     test('validate email', async () => {
         const session = new TestClient();
         await session.register(false);
-        const { sendConfMail } = await session.query(sendConfMailQuery('random-email'));
-        expect(sendConfMail).toEqual(false);
+        const { sendVerificationEmail } = await session.query(sendConfMailQuery('random-email'));
+        expect(sendVerificationEmail).toEqual(false);
     });
 
     test('verify using query', async () => {
         const session = new TestClient();
         const { email } = await session.register(false);
-        const { sendConfMail } = await session.query(sendConfMailQuery(email));
-        expect(sendConfMail).toEqual(true);
+        const { sendVerificationEmail } = await session.query(sendConfMailQuery(email));
+        expect(sendVerificationEmail).toEqual(true);
         const key = await getRedisKeyForValue(REDIS_VERIFY_USER, email);
         expect(key).not.toEqual(null);
         if (key) {

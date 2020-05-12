@@ -24,6 +24,6 @@ if (process.env.GOOGLE_CLIENT_ID) {
         [GOOGLE_OAUTH_CALLBACK_URL, authenticate, OAuthCallback],
     ];
 }
-export const urlPatterns = {
+export default {
     get: views,
 };

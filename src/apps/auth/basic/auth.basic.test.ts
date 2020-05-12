@@ -31,10 +31,10 @@ afterAll(async () => {
     await conn.close();
 });
 
-const registerWithPasswordException = TestClient.checkError('registerWithPassword');
+const registerWithPasswordException = TestClient.checkError('register');
 const registerWithPasswordQuery = (email: string, password: string, name: string): string => `
     mutation {
-        registerWithPassword(email: "${email}", password: "${password}", name: "${name}") {
+        register(email: "${email}", password: "${password}", name: "${name}") {
             __typename
             
             ... on Exceptions {
@@ -52,10 +52,10 @@ const registerWithPasswordQuery = (email: string, password: string, name: string
     }
 `;
 
-const loginException = TestClient.checkError('loginWithPassword');
+const loginException = TestClient.checkError('login');
 const loginQuery = (email: string, password: string): string => `
     mutation {
-        loginWithPassword(email: "${email}", password: "${password}") {
+        login(email: "${email}", password: "${password}") {
             __typename
             
             ... on Exceptions {
@@ -105,9 +105,7 @@ describe('basic registration', (): void => {
     test('password is hashed', async (): Promise<void> => {
         const { email, name, password } = TestClient.createCredentials();
         const session = new TestClient();
-        const { registerWithPassword: register } = await session.query(
-            registerWithPasswordQuery(email, password, name),
-        );
+        const { register } = await session.query(registerWithPasswordQuery(email, password, name));
 
         const auth = await BasicAuth.findOne({
             where: { user: { id: register.id } },
@@ -122,8 +120,8 @@ describe('basic registration', (): void => {
         const { email, name, password } = TestClient.createCredentials();
         const session = new TestClient();
         const data = await session.query(registerWithPasswordQuery(email, password, name));
-        expect(data?.registerWithPassword.__typename).toEqual('User');
-        expect(data?.registerWithPassword.email).toEqual(email);
+        expect(data?.register.__typename).toEqual('User');
+        expect(data?.register.email).toEqual(email);
     });
 });
 
@@ -152,11 +150,9 @@ describe('basic login', (): void => {
     test('login success', async (): Promise<void> => {
         const { email, name, password } = TestClient.createCredentials();
         const session = new TestClient();
-        const { registerWithPassword: register } = await session.query(
-            registerWithPasswordQuery(email, password, name),
-        );
+        const { register } = await session.query(registerWithPasswordQuery(email, password, name));
 
-        const { loginWithPassword: login } = await session.query(loginQuery(email, password));
+        const { login } = await session.query(loginQuery(email, password));
         expect(login?.id).toEqual(register.id);
 
         const me = await session.me();
@@ -352,14 +348,12 @@ describe('forgot password', () => {
     test('success', async () => {
         const session = new TestClient();
         const { password, email, name } = TestClient.createCredentials();
-        const { registerWithPassword } = await session.query(registerWithPasswordQuery(email, password, name));
+        const { register } = await session.query(registerWithPasswordQuery(email, password, name));
         await session.query(sendForgetPasswordMailQuery(email));
-        const otp = JSON.parse(
-            (await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${registerWithPassword.id}`)) as string,
-        );
+        const otp = JSON.parse((await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${register.id}`)) as string);
         await session.query(forgetPasswordQuery(email, otp, password));
         await session.query(loginQuery(email, password));
         const me = await session.me();
-        expect(me.id).toEqual(registerWithPassword.id);
+        expect(me.id).toEqual(register.id);
     });
 });

@@ -5,21 +5,18 @@ import { User } from 'apps/entities/User';
 import { ValidationException } from 'apps/exceptions';
 import { redis } from 'server/redis';
 import { getRedisKeyForValue } from 'utils/funcs';
-import { REDIS_USER_SESSION_PREFIX, REDIS_SESSION_PREFIX, REDIS_VERIFY_USER } from 'server/constants';
+import { REDIS_SESSION_PREFIX, REDIS_USER_SESSION_PREFIX, REDIS_VERIFY_USER } from 'server/constants';
 
 import { registerParmValidator } from './validators';
 import { UserExistsException } from './exceptions';
 import { VERIFY_USER_URL } from './views';
+import { findUserByEmail } from '../utils';
 
 export interface RegisterParams {
     email: string;
     name: string;
     redirectAfterVerification?: string;
 }
-
-export const findUserByEmail = async (email: string): Promise<User | undefined> => {
-    return await User.findOne({ where: { email: email.toLowerCase() } });
-};
 
 export const register = async (params: RegisterParams): Promise<User> => {
     let { email, name } = params;

@@ -1,0 +1,7 @@
+# import User from 'apps/common.gql'
+
+type Mutation {
+    testRegister (email: String!, name: String!, verify: Boolean): User
+    testLogin (email: String!): User
+    testVerify (email: String!): Boolean
+}

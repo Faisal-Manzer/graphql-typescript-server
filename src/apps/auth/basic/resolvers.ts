@@ -8,13 +8,13 @@ import { Done, Exception } from 'utils/exceptionGenerator';
 import { ValidationException, UnknownException } from 'apps/exceptions';
 import { User } from 'apps/entities/User';
 import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
-import { ACCOUNT_LOCKED_EXCEPTION, RecaptchaNotValidException, UserDoesNotExistException } from '../exceptions';
 import { sendMailTask } from 'apps/tasks';
 import { redis } from 'server/redis';
 import { REDIS_FORGOT_PASSWORD_PREFIX } from 'server/constants';
 
-import { findUserByEmail, loginUser, register, lockAccount } from '../utils';
+import { loginUser, register, lockAccount } from '../utils';
 import { googleRecaptchaValidator } from '../recaptcha';
+import { ACCOUNT_LOCKED_EXCEPTION, RecaptchaNotValidException, UserDoesNotExistException } from '../exceptions';
 
 import {
     InvalidCredentialsException,
@@ -32,10 +32,11 @@ import {
 import { checkCredentials, generateForgotPasswordOTP, getBasicAuthUsingEmail } from './utils';
 import { resetOtpMaxLimitTask } from './tasks';
 import { TestClient } from '../../../utils/testClient';
+import { findUserByEmail } from '../../utils';
 
-export const Resolvers: ResolverMap = {
+const Resolvers: ResolverMap = {
     Mutation: {
-        registerWithPassword: async (
+        register: async (
             _,
             args: GQL.IRegisterWithPasswordOnMutationArguments,
             { ip }: ResolverContext,
@@ -74,7 +75,7 @@ export const Resolvers: ResolverMap = {
             return e.exception;
         },
 
-        loginWithPassword: async (
+        login: async (
             _,
             args: GQL.ILoginWithPasswordOnMutationArguments,
             { session }: ResolverContext,
@@ -87,7 +88,6 @@ export const Resolvers: ResolverMap = {
                 user = (await checkCredentials(email, password)) as User;
             } catch (exception) {
                 e.add(exception);
-                console.log('aEXE', exception.code);
                 if (exception.code !== ACCOUNT_LOCKED_EXCEPTION) await lockAccount(email);
                 return e.exception;
             }
@@ -208,3 +208,5 @@ export const Resolvers: ResolverMap = {
         },
     },
 };
+
+export default Resolvers;

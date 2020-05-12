@@ -32,6 +32,6 @@ export const verifyUser = async (req: Request, res: Response): Promise<any> => {
     res.redirect(url.href);
 };
 
-export const urlPatterns = {
+export default {
     get: [[VERIFY_USER_URL, verifyUser]],
 };

@@ -24,6 +24,6 @@ if (process.env.LINKEDIN_API_KEY) {
         [LINKEDIN_OAUTH_CALLBACK_URL, authenticate, OAuthCallback],
     ];
 }
-export const urlPatterns = {
+export default {
     get: views,
 };

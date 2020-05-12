@@ -6,9 +6,6 @@ type Query {
 
 type Mutation {
     logout (fromAll: Boolean = false): Boolean
-    testRegister (email: String!, name: String!, verify: Boolean): User
-    testLogin (email: String!): User
-    testVerify (email: String!): Boolean
     updateName (name: String!): DoneOrExceptions
-    sendConfMail (email: String!, redirect: String!): Boolean
+    sendVerificationEmail (email: String!, redirect: String!): Boolean
 }

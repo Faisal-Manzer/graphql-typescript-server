@@ -32,3 +32,8 @@ export const LoginRequiredException = Exception.generator({
     message: 'You must login to use this resource.',
     code: LOGIN_REQUIRED_EXCEPTION,
 });
+export const USER_NOT_VERIFIED = 'UserNotVerifiedException';
+export const UserNotVerifiedException = Exception.generator({
+    code: USER_NOT_VERIFIED,
+    message: 'User not verified. Check your mail box.',
+});

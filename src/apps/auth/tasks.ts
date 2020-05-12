@@ -1,7 +1,7 @@
 import * as Task from 'bull';
 
 import { REDIS_URL } from 'server/constants';
-import { findUserByEmail } from './utils';
+import { findUserByEmail } from '../utils';
 
 export const UNLOCK_ACCOUNT_TYPE = 'unLockAccountTask';
 

@@ -11,7 +11,7 @@ import { Server as HttpServer, Context, ContextProvider } from 'types';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
-import { generateSchema, hookViews } from './schema';
+import { generateMiddlewares, generateSchema, hookViews } from './schema';
 import { middlewares } from './middlewares';
 import { corsOrigins } from './cors';
 
@@ -40,6 +40,7 @@ export class Server {
         this.server = new GraphQLServer({
             schema: this.schema,
             context: this.getServerContext,
+            middlewares: generateMiddlewares(),
         });
 
         this.cors = this.getCorsSettings();

@@ -5,14 +5,14 @@ import { redis } from 'server/redis';
 import { loginRequired, LoginRequiredExtra } from 'apps/decorators';
 import { Done, Exception } from 'utils/exceptionGenerator';
 
-import { createVerificationLink, findUserByEmail, loginUser, logOutOfAllSession, register } from './utils';
-import { emailValidator, nameValidator, sendConfMailParmValidator } from './validators';
+import { createVerificationLink, loginUser, logOutOfAllSession, register } from './utils';
+import { nameValidator, sendConfMailParmValidator } from './validators';
 
 import { ValidationException } from '../exceptions';
-import { IDone } from '../../types';
+import { IDone, IExceptions } from '../../types';
 import { sendMailTask } from '../tasks';
 
-export const Resolvers: ResolverMap = {
+const Resolvers: ResolverMap = {
     UserOrExceptions: {
         __resolveType: (obj): string => (obj.exceptions ? 'Exceptions' : 'User'),
     },
@@ -20,49 +20,9 @@ export const Resolvers: ResolverMap = {
         __resolveType: (obj): string => (obj.exceptions ? 'Exceptions' : 'Done'),
     },
     Query: {
-        me: loginRequired<User>({ checkVerified: false })(
-            async (_: any, __: any, { session }: ResolverContext) => session.user,
-        ),
+        me: async (_: any, __: any, { user }: any): Promise<User> => user,
     },
     Mutation: {
-        /**
-         * These are only for test and are insecure
-         * please use env check here
-         */
-
-        testRegister: async (_, args: GQL.ITestRegisterOnMutationArguments): Promise<User | null> => {
-            if (process.env.NODE_ENV === 'test') {
-                const user = await register(args);
-                if (args.verify) user.verified = true;
-                await user.save();
-                return user;
-            }
-            return null;
-        },
-        testLogin: async (_, args: any, { session }: ResolverContext): Promise<User | null> => {
-            if (process.env.NODE_ENV === 'test') {
-                const user = await findUserByEmail(args.email);
-                if (user) {
-                    await loginUser(session, user);
-                    return user;
-                }
-            }
-            return null;
-        },
-        testVerify: async (_, args: any): Promise<boolean> => {
-            if (process.env.NODE_ENV === 'test') {
-                const user = await findUserByEmail(args.email);
-                if (user) {
-                    user.verified = true;
-                    await user.save();
-                    return true;
-                }
-
-                return false;
-            }
-            return false;
-        },
-
         /**
          * These will be used in production
          * make sure that all are secure
@@ -86,18 +46,16 @@ export const Resolvers: ResolverMap = {
                 return destroySession();
             });
         },
-        updateName: loginRequired<IDone>({ query: true })(
-            async (_: any, { name }: any, __: any, ___: any, { user }: LoginRequiredExtra) => {
-                try {
-                    user.name = (await nameValidator.validate(name)) as string;
-                    await user.save();
-                    return Done();
-                } catch (validationError) {
-                    return Exception.new(ValidationException(validationError));
-                }
-            },
-        ),
-        sendConfMail: async (_, args: GQL.ISendConfMailOnMutationArguments, { host }): Promise<boolean> => {
+        updateName: async (_: any, { name }: any, { user }: any, ___: any): Promise<IDone | IExceptions> => {
+            try {
+                user.name = (await nameValidator.validate(name)) as string;
+                await user.save();
+                return Done();
+            } catch (validationError) {
+                return Exception.new(ValidationException(validationError));
+            }
+        },
+        sendVerificationEmail: async (_, args: GQL.ISendConfMailOnMutationArguments, { host }): Promise<boolean> => {
             const { redirect } = args;
             let email = '';
 
@@ -105,7 +63,6 @@ export const Resolvers: ResolverMap = {
                 const data = await sendConfMailParmValidator.validate(args);
                 email = data.email;
             } catch (e) {
-                console.log(e);
                 return false;
             }
 
@@ -115,3 +72,5 @@ export const Resolvers: ResolverMap = {
         },
     },
 };
+
+export default Resolvers;

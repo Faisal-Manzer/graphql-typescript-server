@@ -25,6 +25,6 @@ if (process.env.GITHUB_CLIENT_ID) {
     ];
 }
 
-export const urlPatterns = {
+export default {
     get: views,
 };
