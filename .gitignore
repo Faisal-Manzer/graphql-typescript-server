@@ -5,9 +5,11 @@ build/
 tmp/
 temp/
 .env
+.env.prod
 .c9
 yarn.lock
 yarn-error.log
 orb.db
 coverage
 roadmap.text
+media

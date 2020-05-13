@@ -1,5 +1,6 @@
 scalar UUID
 scalar any
+scalar Upload
 
 directive @loginRequired(exception: Boolean = false, verified: Boolean = true) on FIELD_DEFINITION
 
@@ -23,6 +24,14 @@ type User {
     email: String,
     name: String,
     verified: Boolean
+}
+
+type File {
+    id: ID!
+    path: String!
+    filename: String!
+    mimetype: String!
+    encoding: String!
 }
 
 union UserOrExceptions = User | Exceptions

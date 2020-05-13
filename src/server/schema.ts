@@ -6,11 +6,12 @@ import { mergeResolvers, mergeTypes } from 'merge-graphql-schemas';
 import { importSchema } from 'graphql-import';
 import { Application } from 'express';
 import { GraphQLSchema } from 'graphql';
+import { isTest } from './constants';
 
 const pathToModules = joinPath(__dirname, '../apps');
 
 const onlyTestFilter = (pattern: RegExp) => (path: string): boolean => {
-    if (process.env.NODE_ENV === 'test') return true;
+    if (isTest) return true;
     else if (basename(path).match(pattern)) return false;
     return true;
 };

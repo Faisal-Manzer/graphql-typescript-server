@@ -1,4 +1,4 @@
-name: Server Test
+name: Test
 
 'on':
   push:
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-node@v1
       - name: Install
         run: npm install
-      - name: Test (npm)
+      - name: Test
         run: npm run test
         env:
           DB_USER: username

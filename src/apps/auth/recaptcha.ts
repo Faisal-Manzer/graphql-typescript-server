@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
 import { allowedHost } from 'server/cors';
+import { isProduction } from 'server/constants';
 
 export const googleRecaptchaValidator = async (captcha: string | undefined | null, ip: string): Promise<boolean> => {
-    if (process.env.NODE_ENV === 'production') {
+    if (isProduction) {
         if (!captcha) return false;
         const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
             method: 'POST',

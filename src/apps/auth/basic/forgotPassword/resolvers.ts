@@ -7,7 +7,7 @@ import { findUserByEmail } from 'apps/utils';
 import { User } from 'apps/entities/User';
 import { sendMailTask } from 'apps/tasks';
 import { redis } from 'server/redis';
-import { REDIS_FORGOT_PASSWORD_PREFIX } from 'server/constants';
+import { MAX_PASSWORD_RESET_TRY, REDIS_FORGOT_PASSWORD_PREFIX } from 'server/constants';
 import { TestClient } from 'utils/testClient';
 
 import { UserDoesNotExistException } from 'apps/auth/exceptions';
@@ -60,7 +60,7 @@ const Resolvers: ResolverMap = {
                 const redisOtp = await redis.get(`${REDIS_FORGOT_PASSWORD_PREFIX}:${user.id}`);
                 const failed = auth.forgotPasswordFailed || 0;
 
-                if (redisOtp && failed < 5)
+                if (redisOtp && failed < MAX_PASSWORD_RESET_TRY)
                     if (otp === JSON.parse(redisOtp)) {
                         await auth.setPassword(password);
                         await auth.save();

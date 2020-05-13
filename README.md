@@ -1,4 +1,4 @@
-![Server Test](https://github.com/Faisal-Manzer/graphql-typescript-server/workflows/Server%20Test/badge.svg)
+![Server Test](https://github.com/Faisal-Manzer/graphql-typescript-server/workflows/Test/badge.svg)
 # GraphQL Server boilerplate
 Written in TypeScript with role based access
 
