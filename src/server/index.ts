@@ -12,7 +12,7 @@ import { ResolverContext } from 'types/graphql-utils';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
-import { generateMiddlewares, generateSchema, hookViews } from './schema';
+import { generateMiddlewares, generateSchema, getTemplateDirs, hookViews } from './mappers';
 import { middlewares } from './middlewares';
 import { corsOrigins } from './cors';
 
@@ -76,6 +76,10 @@ export class Server {
 
     addMiddleware(): void {
         middlewares.map((middleware) => this.server.express.use(middleware));
+
+        this.server.express.set('view engine', 'ejs');
+        this.server.express.set('views', getTemplateDirs());
+
         hookViews(this.server.express);
     }
 

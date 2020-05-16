@@ -71,3 +71,7 @@ export const hookViews = (express: Application): void => {
         }
     });
 };
+
+export const getTemplateDirs = (): Array<string> => {
+    return globSync(`${pathToModules}/**/?(*.)templates`);
+};

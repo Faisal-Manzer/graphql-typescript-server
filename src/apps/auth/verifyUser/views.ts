@@ -9,7 +9,7 @@ import { createURL } from 'utils/funcs';
 
 export const verifyUser = async (req: Request, res: Response): Promise<any> => {
     let success = false;
-    let message = '';
+    let message;
 
     const { key: id } = req.params;
     const redirect = req.query.redirect as string;

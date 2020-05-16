@@ -40,26 +40,14 @@ declare namespace GQL {
 
     interface IMutation {
         __typename: 'Mutation';
-        login: UserOrExceptions | null;
-        register: UserOrExceptions | null;
         changePassword: DoneOrExceptions | null;
         sendForgotPasswordMail: IDone | null;
         forgotPassword: UserOrExceptions | null;
+        login: LoginOrExceptions | null;
+        register: UserOrExceptions | null;
         logout: boolean | null;
         updateName: DoneOrExceptions | null;
         sendVerificationEmail: boolean | null;
-    }
-
-    interface ILoginOnMutationArguments {
-        email: string;
-        password: string;
-    }
-
-    interface IRegisterOnMutationArguments {
-        email: string;
-        password: string;
-        name: string;
-        captcha?: string | null;
     }
 
     interface IChangePasswordOnMutationArguments {
@@ -75,6 +63,18 @@ declare namespace GQL {
         email: string;
         otp: number;
         password: string;
+    }
+
+    interface ILoginOnMutationArguments {
+        email: string;
+        password: string;
+    }
+
+    interface IRegisterOnMutationArguments {
+        email: string;
+        password: string;
+        name: string;
+        captcha?: string | null;
     }
 
     interface ILogoutOnMutationArguments {
@@ -93,7 +93,12 @@ declare namespace GQL {
         redirect: string;
     }
 
-    type UserOrExceptions = IUser | IExceptions;
+    type DoneOrExceptions = IDone | IExceptions;
+
+    interface IDone {
+        __typename: 'Done';
+        done: boolean | null;
+    }
 
     interface IExceptions {
         __typename: 'Exceptions';
@@ -108,11 +113,23 @@ declare namespace GQL {
         data: any | null;
     }
 
-    type DoneOrExceptions = IDone | IExceptions;
+    type UserOrExceptions = IUser | IExceptions;
 
-    interface IDone {
-        __typename: 'Done';
-        done: boolean | null;
+    type LoginOrExceptions = ILogin | IExceptions;
+
+    interface ILogin {
+        __typename: 'Login';
+        user: IUser | null;
+        token: string | null;
+    }
+
+    interface IFile {
+        __typename: 'File';
+        id: string;
+        path: string;
+        filename: string;
+        mimetype: string;
+        encoding: string;
     }
 }
 
