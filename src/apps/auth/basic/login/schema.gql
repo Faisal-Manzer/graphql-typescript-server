@@ -1,5 +1,11 @@
 # import UserOrExceptions from 'apps/common.gql'
 
+type Login {
+    user: User,
+    token: String
+}
+
+union LoginOrExceptions = Login | Exceptions
 type Mutation {
-    login (email: String!, password: String!): UserOrExceptions
+    login (email: String!, password: String!): LoginOrExceptions
 }

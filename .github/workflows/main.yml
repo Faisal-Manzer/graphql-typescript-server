@@ -1,4 +1,4 @@
-name: Test
+name: Server
 
 'on':
   push:
@@ -38,3 +38,19 @@ jobs:
           DB_PASS: password
           TEST_DB_NAME: test-database
           SECRET_KEY: '1yh6^rf!0*$3xp*q$qfnxnp#w-nve4l!#r0xo46g5vi7hvya5h'
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - name: Install
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Artifact
+        run: npm run artifact
+      - uses: actions/upload-artifact@v1
+        with:
+          name: compiled
+          path: dist/package.zip

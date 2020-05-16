@@ -8,8 +8,9 @@ import { isTest } from 'server/constants';
 
 import { LoginRequiredException, UserNotVerifiedException } from './exceptions';
 import { findUserById } from './utils';
+import { getUserIDFromRequest } from './auth/jwt.utils';
 
-class IsAuthenticatedDirective extends SchemaDirectiveVisitor {
+class LoginRequiredDirective extends SchemaDirectiveVisitor {
     visitFieldDefinition(field: GraphQLField<any, any>): GraphQLField<any, any> | void | null {
         const { resolve = defaultFieldResolver } = field;
         const { exception = false, verified = true } = this.args;
@@ -20,10 +21,12 @@ class IsAuthenticatedDirective extends SchemaDirectiveVisitor {
         };
 
         field.resolve = async function (parent, args, context, info): Promise<any> {
-            const userId = context.session.userId;
-            if (!userId) return returnError(LoginRequiredException());
+            let userId = context.session.userId;
+            if (!userId) userId = getUserIDFromRequest(context.request);
+
             const user = await findUserById(userId);
             if (!user) return returnError();
+
             if (verified && !user.verified) return returnError(UserNotVerifiedException());
             return resolve.apply(this, [parent, args, { ...context, user }, info]);
         };
@@ -41,6 +44,6 @@ class TestOnlyDirective extends SchemaDirectiveVisitor {
 }
 
 export default {
-    loginRequired: IsAuthenticatedDirective,
+    loginRequired: LoginRequiredDirective,
     testOnly: TestOnlyDirective,
 };

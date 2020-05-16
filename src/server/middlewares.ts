@@ -5,8 +5,18 @@ import * as SlowDown from 'express-slow-down';
 import * as passport from 'passport';
 import * as ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
+import { config as dotEnvConfig } from 'dotenv';
+dotEnvConfig();
 
-import { isProduction, isTest, REDIS_RATE_LIMIT, REDIS_SESSION_PREFIX, REDIS_SLOW_DOWN, REDIS_URL } from './constants';
+import {
+    isProduction,
+    isTest,
+    MAX_SESSION_EXPIRY,
+    REDIS_RATE_LIMIT,
+    REDIS_SESSION_PREFIX,
+    REDIS_SLOW_DOWN,
+    REDIS_URL,
+} from './constants';
 
 const Store = ConnectRedis(session);
 const client = createClient(REDIS_URL);
@@ -15,13 +25,13 @@ const sessionMiddleware = session({
     name: 'clientid',
     // @ts-ignore
     store: new Store({ client, prefix: `${REDIS_SESSION_PREFIX}:` }),
-    secret: process.env.SECRET_KEY || '*ib8529gv12+ci*2%c$q0vyhke2!i1stk(*uv@ol7dz+6ho*yk',
+    secret: process.env.SECRET_KEY as string,
     resave: false,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
         secure: isProduction,
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge: MAX_SESSION_EXPIRY,
     },
 });
 

@@ -1,4 +1,3 @@
-import { Redis } from 'ioredis';
 import { Request as ExpressRequest, Express } from 'express';
 import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
@@ -12,14 +11,6 @@ export interface Request extends ExpressRequest {
 }
 export interface ContextProvider {
     request: Request;
-}
-
-export interface Context {
-    redis: Redis;
-    request: Request;
-    session: Session;
-    host: string;
-    ip: string;
 }
 
 export interface IException {

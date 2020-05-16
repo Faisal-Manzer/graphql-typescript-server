@@ -3,7 +3,7 @@ import { allowedHost } from 'server/cors';
 import { isProduction } from 'server/constants';
 
 export const googleRecaptchaValidator = async (captcha: string | undefined | null, ip: string): Promise<boolean> => {
-    if (isProduction) {
+    if (isProduction && process.env.GOOGLE_RECAPTCHA_SECRET) {
         if (!captcha) return false;
         const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
             method: 'POST',

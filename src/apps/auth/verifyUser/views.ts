@@ -5,7 +5,7 @@ import { REDIS_VERIFY_USER } from 'server/constants';
 
 import { User } from 'apps/entities/User';
 import { VERIFY_USER_URL } from 'apps/auth/constants';
-import { redirectUrl } from '../utils';
+import { createURL } from 'utils/funcs';
 
 export const verifyUser = async (req: Request, res: Response): Promise<any> => {
     let success = false;
@@ -23,7 +23,14 @@ export const verifyUser = async (req: Request, res: Response): Promise<any> => {
         if (affected && affected > 0) [success, message] = [true, 'Email successfully verified'];
         else message = 'No such email found';
     } else message = 'The link either expired or invalid';
-    res.redirect(redirectUrl(redirect, email, success, message));
+
+    res.redirect(
+        createURL(redirect, {
+            email: email || '',
+            success,
+            message,
+        }),
+    );
 };
 
 export default {

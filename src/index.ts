@@ -9,7 +9,7 @@ import { Server } from './server';
 import { AddressInfo } from 'net';
 
 dotEnvConfig();
-const server = new Server({}, 4000);
+const server = new Server({});
 server.start().then((app) => {
     const { port } = app.address() as AddressInfo;
     console.log(`Started server at http://localhost:${port}`);

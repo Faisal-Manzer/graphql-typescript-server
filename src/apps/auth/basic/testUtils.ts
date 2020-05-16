@@ -13,9 +13,12 @@ export const loginQuery = (email: string, password: string): string => `
                 }
             }
             
-            ... on User {
-                id
-                email
+            ... on Login {
+                user {
+                    id
+                    email
+                }
+                token
             }
         }
     }

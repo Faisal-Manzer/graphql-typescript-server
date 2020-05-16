@@ -1,4 +1,5 @@
 import { redis } from 'server/redis';
+import { URL } from 'url';
 
 export function variableOrArray<T>(variable: T | T[]): T[] {
     const arr: T[] = [];
@@ -37,6 +38,18 @@ export const addHttp = (url: string): string => {
         url = 'http://' + url;
     }
     return url;
+};
+
+export const createURL = (rawURL: string, parms: object): string => {
+    const url = new URL(addHttp(rawURL));
+    for (const key in parms) {
+        if (parms.hasOwnProperty(key)) {
+            // @ts-ignore
+            url.searchParams.append(key, `${parms[key]}`);
+        }
+    }
+
+    return url.href;
 };
 
 export const getRandomInt = (min: number, max: number): number => {

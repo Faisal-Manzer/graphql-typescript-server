@@ -46,6 +46,7 @@ const Resolvers: ResolverMap = {
 
                 return user;
             } catch (exceptions) {
+                console.log(exceptions);
                 if (Array.isArray(exceptions)) e.add(exceptions);
                 else e.add(UnknownException({}));
             }

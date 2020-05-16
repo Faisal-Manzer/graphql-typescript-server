@@ -106,11 +106,3 @@ export const lockAccount = async (email: string): Promise<void> => {
         }
     }
 };
-
-export const redirectUrl = (redirect: string, email: string | null, success: boolean, message: string): string => {
-    const url = new URL(addHttp(redirect));
-    url.searchParams.append('email', email || '');
-    url.searchParams.append('success', success.toString());
-    url.searchParams.append('message', message);
-    return url.href;
-};

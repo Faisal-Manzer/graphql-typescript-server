@@ -1,8 +1,9 @@
+import { join as pathJoin } from 'path';
 import { createConnection, Connection } from 'typeorm';
 
 const getConnectionOptions = (): any => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const ormConfig = require('../../ormconfig');
+    const ormConfig = require(pathJoin(process.cwd(), 'ormconfig'));
     return ormConfig[0];
 };
 

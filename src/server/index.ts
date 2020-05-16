@@ -7,7 +7,8 @@ import { CorsOptions } from 'cors';
 
 import { GraphQLServer } from 'graphql-yoga';
 
-import { Server as HttpServer, Context, ContextProvider } from 'types';
+import { Server as HttpServer, ContextProvider } from 'types';
+import { ResolverContext } from 'types/graphql-utils';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
@@ -57,11 +58,12 @@ export class Server {
         return { credentials: true, origin: corsOrigins };
     }
 
-    getServerContext({ request }: ContextProvider): Context {
+    getServerContext({ request }: ContextProvider): ResolverContext {
         return {
             redis: this.redis,
             request,
             host: `${request.protocol}://${request.get('host')}`,
+            // @ts-ignore
             session: request.session,
             ip: request.ip,
         };

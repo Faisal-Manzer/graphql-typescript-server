@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2019",
     "module": "commonjs",
     "baseUrl": "./src",
     "lib": [
@@ -26,8 +26,7 @@
     "experimentalDecorators": true
   },
   "exclude": [
-    "node_modules",
-    "src/migrations"
+    "node_modules"
   ],
   "include": [
     "./src/**/*.tsx",

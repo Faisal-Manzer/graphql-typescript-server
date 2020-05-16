@@ -2,13 +2,18 @@ import { Response } from 'express';
 import * as passport from 'passport';
 
 import { Request } from 'types';
+import { createURL } from 'utils/funcs';
 
-import { findOrRegisterUser, redirectUrl, RegisterParams } from './utils';
+import { findOrRegisterUser, RegisterParams } from './utils';
+import { getJWT } from './jwt.utils';
+
+import { User } from '../entities/User';
 
 const defaultGetUserCredentials = (profile: any): RegisterParams => ({
     email: profile.emails[0].value,
     name: profile.displayName,
 });
+
 export const OAuth = (strategy: any, options: any, getUserCredentials: Function = defaultGetUserCredentials): void => {
     passport.use(
         new strategy(options, async function (
@@ -39,16 +44,54 @@ export const OAuthCallback = (req: Request, res: Response): void => {
     delete req.session.redirect;
 
     let email = '';
-    if (req.session.passport.user) {
+    const user = req.user as User | undefined;
+    if (user) {
         success = true;
-        req.session.user = req.session.passport.user;
-        delete req.session.passport;
-        email = req.session.user.email;
+        req.session.userId = user.id;
+        email = (req.user as User).email;
     }
 
-    if (redirect) res.redirect(redirectUrl(redirect, email, success, !success ? req.session.err : 'Login success'));
+    if (redirect)
+        res.redirect(
+            createURL(redirect, {
+                email,
+                success,
+                message: !success ? req.session.err : 'Login success',
+                token: getJWT(user?.id as string),
+            }),
+        );
     else {
-        if (success) res.send(`Welcome ${req.session.user.name}`);
+        if (success) res.send(`Welcome ${user?.name}`);
         else res.send('Login failed');
     }
+};
+
+interface IOAuthView {
+    name: string;
+    strategy: any;
+    options: any;
+    getUser?: Function;
+    viewOptions?: any;
+    callbackOptions?: any;
+}
+
+export const OAuthViews = ({
+    name,
+    strategy,
+    options,
+    getUser = defaultGetUserCredentials,
+    viewOptions = {},
+    callbackOptions = {},
+}: IOAuthView): Array<any> => {
+    OAuth(strategy, options, getUser);
+
+    const view = OAuthAuthenticate(name, viewOptions);
+    const callback = passport.authenticate(name, { session: false, ...callbackOptions });
+    const viewURL = `/auth/${name}/`;
+    const callbackURL = `/auth/${name}/callback/`;
+
+    return [
+        [viewURL, view],
+        [callbackURL, callback, OAuthCallback],
+    ];
 };
