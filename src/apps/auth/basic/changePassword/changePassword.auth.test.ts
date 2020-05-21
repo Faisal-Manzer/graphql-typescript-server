@@ -51,6 +51,7 @@ describe('change password', () => {
 
     test('no user', async () => {
         const session = new TestClient();
+        console.log('--- 1');
         const { email, password: oldPassword, name } = TestClient.createCredentials();
         await session.query(registerQuery(email, oldPassword, name));
         await session.verifyUser(email);
@@ -58,13 +59,21 @@ describe('change password', () => {
 
         const auth = await getBasicAuthUsingEmail(email);
         if (auth) {
+            console.log('--- 2');
             const user = auth.user;
+            console.log('--- 3');
             await auth.remove();
+            console.log('--- 4');
             await user.remove();
         }
 
+        console.log('--- 5');
         const { password: newPassword } = TestClient.createCredentials();
+
+        console.log('--- 6');
         const data = await session.query(changePasswordQuery(newPassword, oldPassword));
+
+        console.log('--- 7');
         changePasswordException(data)(LOGIN_REQUIRED_EXCEPTION, null);
     });
 

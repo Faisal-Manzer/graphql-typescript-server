@@ -19,7 +19,10 @@ export const verifyToken = (token: string): string | undefined => {
 };
 
 export const getUserIDFromRequest = (request: Request): string | undefined => {
-    const token = request.get('Authorization');
+    const header = request.get('Authorization') || '';
+    let token;
+    if (header.startsWith('Bearer ')) token = header.slice(7, header.length);
+    else return undefined;
     if (!token) return undefined;
     return verifyToken(token);
 };

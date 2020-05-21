@@ -44,6 +44,7 @@
     "@types/yup": "^0.28.3",
     "@typescript-eslint/eslint-plugin": "^2.32.0",
     "@typescript-eslint/parser": "^2.32.0",
+    "commander": "^5.1.0",
     "copyfiles": "^2.2.0",
     "eslint": "^7.0.0",
     "eslint-config-prettier": "^6.11.0",
@@ -107,15 +108,17 @@
   "scripts": {
     "start": "per-env",
     "start:development": "nodemon --exec ts-node --files src/index.ts",
-    "start:production": "node index.js",
+    "start:production": "node --experimental-modules index.js",
     "lint": "eslint '*/**/*.{js,ts,json}' --fix",
     "test": "NODE_ENV=test NODE_PATH=src TS_NODE_FILES=true jest -i --forceExit",
     "db": "TS_NODE_TRANSPILE_ONLY=true NODE_PATH=src ts-node ./node_modules/typeorm/cli.js --config ormconfig.ts",
     "makemigrations": "yarn db migration:generate",
     "migrate": "yarn db migration:run",
-    "gen-schema-types": "NODE_PATH=src ts-node ./lib/generateGQLTypes.ts",
     "build": "rimraf dist && tsc && tsc ormconfig.ts --outDir dist/ && copyfiles -u 1 \"**/*.gql\" dist",
-    "artifact": "./lib/pack.sh"
+    "artifact": "./lib/pack.sh",
+    "gen-schema-types": "NODE_PATH=src ts-node ./lib/generateGQLTypes.js",
+    "generate": "./lib/bootstrap.js",
+    "load-roles": "NODE_PATH=src ts-node ./lib/loadRoles.js"
   },
   "husky": {
     "hooks": {

@@ -1,4 +1,4 @@
-# import UserOrExceptions from 'apps/common.gql'
+# import UserOrExceptions from 'apps/schema.gql'
 
 type Mutation {
     register (email: String!, password: String!, name: String!, captcha: String): UserOrExceptions

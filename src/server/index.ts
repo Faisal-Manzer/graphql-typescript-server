@@ -12,7 +12,7 @@ import { ResolverContext } from 'types/graphql-utils';
 
 import { dbConnect } from './db';
 import { redis } from './redis';
-import { generateMiddlewares, generateSchema, getTemplateDirs, hookViews } from './mappers';
+import { generateMiddlewares, generateSchema, getTemplateDirs, hookViews } from './loaders';
 import { middlewares } from './middlewares';
 import { corsOrigins } from './cors';
 

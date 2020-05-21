@@ -28,6 +28,7 @@ export const generateResolverSchema = (): any => {
     const resolvers = globSync(`${pathToModules}/**/?(*.)resolvers.?s`)
         .filter(onlyTestFilter(/^test\.resolvers\.[jt]s$/))
         .map((resolver: string) => require(resolver).default);
+
     return mergeResolvers(resolvers);
 };
 
@@ -70,6 +71,35 @@ export const hookViews = (express: Application): void => {
             }
         }
     });
+};
+
+export const rolesLoader = async (): Promise<void> => {
+    const perms: any = {};
+    const roles: any = {};
+
+    globSync(`${pathToModules}/**/?(*.)roles.?s`)
+        .filter(onlyTestFilter(/^test\.roles\.[jt]s$/))
+        .map((module: string) => {
+            const prs = require(module);
+            for (const perm in prs)
+                if (prs.hasOwnProperty(perm) && prs[perm].__typename === 'permission') perms[perm] = prs[perm];
+
+            for (const role in prs)
+                if (prs.hasOwnProperty(role) && prs[role].__typename === 'role') roles[role] = prs[role];
+        });
+
+    const permEntity: any = {};
+    for (const perm in perms)
+        if (perms.hasOwnProperty(perm)) {
+            permEntity[perm] = await perms[perm].load();
+            console.log('Loaded... PERMISSION ', perm);
+        }
+
+    for (const role in roles)
+        if (roles.hasOwnProperty(role)) {
+            await roles[role].load(roles[role].permissions.map((perm: any) => permEntity[perm.code]));
+            console.log('Loaded... ROLE ', role);
+        }
 };
 
 export const getTemplateDirs = (): Array<string> => {

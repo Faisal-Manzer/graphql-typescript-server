@@ -7,8 +7,8 @@ export class BasicAuth extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @OneToOne(() => User)
     @JoinColumn()
+    @OneToOne(() => User)
     user: User;
 
     @Column('text')

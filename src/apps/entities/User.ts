@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToMany, JoinColumn } from 'typeorm';
+import { Permission, Role } from './Permissions';
 
 @Entity('users')
-@Unique(['email'])
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -20,4 +20,12 @@ export class User extends BaseEntity {
 
     @Column('int', { default: 0 })
     failedAttempts: number;
+
+    @JoinColumn()
+    @ManyToMany(() => Role)
+    roles: Role[];
+
+    @JoinColumn()
+    @ManyToMany(() => Permission)
+    permissions: Permission[];
 }

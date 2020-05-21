@@ -1,4 +1,4 @@
-# import User from 'apps/common.gql'
+# import User from 'apps/schema.gql'
 directive @testOnly on FIELD_DEFINITION
 
 type Mutation {
